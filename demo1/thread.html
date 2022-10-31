@@ -67,7 +67,7 @@
       // delete thread
 
       const username = getUrlParameter("username")
-      if (threadUser != username) {
+      if (threadUser !== username) {
         alert("You cannot delete a thread that is not created by yourself")
         return
       }
