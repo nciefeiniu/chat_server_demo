@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login Form</title>
+</head>
+
+<body>
+  <h2>首页</h2><br>
+  <div class="main-box">
+
+    <div class="items">
+      <div class="inline-box-left">Topics: </div>
+      <div class="inline-box-right"><button onclick="delThread()">Delete Thread</button></div>
+    </div>
+    <div class="threads-box" id="threads-box">
+      <ul id="threads-box-ol">
+      </ul>
+    </div>
+
+    <div class="items">
+      <div class="inline-box-left">
+        <input id="postInput" name="postInput" placeholder="My reply" style="width: 300px;">
+      </div>
+      <div class="inline-box-right"><button onclick="addNewPost()">Post</button></div>
+    </div>
+
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script>
+
+    const apiHost = "http://127.0.0.1:7777"
+    const threadsOl = document.getElementById("threads-box-ol")
+    let threadUser = null
+
+    $(function () {
+      getAllPosts()
+    });
+
+    setInterval(getAllPosts, 1000 * 10)
+
+    function getAllPosts() {
+      const postId = getUrlParameter("postid")
+      threadsOl.innerText = ""
+      $.get(apiHost + "/api/threads/" + postId, function (result) {
+        allPosts = result
+        let num = 1
+        threadUser = result["user"]
+        allPosts["posts"].forEach(function (item) {
+          let para = document.createElement("li")
+          para.setAttribute("id", "post-" + num)
+          threadsOl.appendChild(para)
+
+          let paraDiv1 = document.createElement("div")
+          let paraDiv2 = document.createElement("div")
+
+          paraDiv1.innerText = item.text
+          paraDiv2.innerText = "- " + item.user
+          para.appendChild(paraDiv1)
+          para.appendChild(paraDiv2)
+        })
+      })
+    }
+
+    function delThread() {
+      // delete thread
+
+      const username = getUrlParameter("username")
+      if (threadUser != username) {
+        alert("You cannot delete a thread that is not created by yourself")
+        return
+      }
+
+      const postId = getUrlParameter("postid")
+      $.ajax({
+        url: apiHost + "/api/threads/" + postId,
+        type: "DELETE",
+        data: JSON.stringify({
+          "user": username,
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          alert("Delete success")
+          window.location.href = "./index.html?username=" + username
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          alert("You cannot delete a thread that is not created by yourself")
+
+        }
+      });
+    }
+
+    function addNewPost() {
+      // send a message to post
+      const postId = getUrlParameter("postid")
+      const content = document.getElementById("postInput").value
+      const username = getUrlParameter("username")
+
+      if (content == "" || content == null || content == undefined) {
+        alert("content can not be empty")
+        return
+      }
+
+      if (postId == "" || postId == null || postId == undefined) {
+        alert("firstPost can not be empty, Please jump from the right place!")
+        return
+      }
+      if (username == "" || username == null || username == undefined) {
+        alert("username can not be empty, Please jump from the right place!")
+        return
+      }
+
+      $.ajax({
+        type: "post",
+        url: apiHost + "/api/threads/" + postId + "/posts",
+        async: false,
+        data: JSON.stringify({
+          "text": content,
+          "user": username,
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          getAllPosts()
+        }
+      })
+    }
+
+    function getUrlParameter(name) {
+      name = name.replace(/[]/, "\[").replace(/[]/, "\[").replace(/[]/, "\\\]")
+      var regexS = "[\\?&]" + name + "=([^&#]*)"
+      var regex = new RegExp(regexS)
+      var results = regex.exec(window.parent.location.href)
+      if (results == null)
+        return ""
+      else {
+        return results[1]
+      }
+    }
+  </script>
+</body>
+
+</html>
+<style>
+  .items {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .main-box {
+    height: 400px;
+    width: 400px;
+    margin: 10px auto;
+  }
+
+  .threads-box {
+    margin-top: 10px;
+    width: 400px;
+    height: 300px;
+    border: 1px red solid;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inline-box-left {
+    justify-content: space-between;
+
+    /* float: left; */
+    /* margin-left: 50px; */
+  }
+
+  .inline-box-right {
+    justify-content: space-between;
+
+    /* float: right; */
+    /* margin-left: 50px; */
+  }
+
+  .thread-line {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+  }
+
+  ul {
+    overflow-y: scroll;
+    height: 400px;
+    max-height: 400px;
+  }
+</style>

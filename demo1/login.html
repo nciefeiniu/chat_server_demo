@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login Form</title>
+</head>
+
+<body>
+  <h2>登录界面</h2><br>
+  <div class="login">
+    <form id="login" method="get">
+      <label><b>userName:</b></label>
+      <input type="text" name="Uname" id="Uname" maxlength="100" placeholder="Enter Username">
+      <br><br>
+    </form>
+    <input type="button" name="log" id="login-button" value="登录" onclick="loginFunc()">
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+  <script>
+    const apiHost = "http://127.0.0.1:7777"
+
+    let allUsers = {}
+
+    $(function () {
+      getAllUsers()
+    });
+
+    function getAllUsers() {
+      $.get(apiHost + "/api/users", function (result) {
+        allThreads = result
+        allThreads.forEach(function (item) {
+          allUsers[item['username']] = item['name']
+        })
+      })
+    }
+
+    function loginFunc() {
+      const name = document.getElementById("Uname").value;
+      if (name == "" || name == null || name == undefined) {
+        alert("Username can not be empty")
+        return
+      }
+      if (!allUsers.hasOwnProperty(name)) {
+        alert("username does not exist")
+        return
+      }
+      window.location.href = "./index.html?username=" + name + "&name=" + allUsers[name];
+    }
+  </script>
+
+</body>
+
+</html>

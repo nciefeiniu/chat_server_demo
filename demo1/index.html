@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login Form</title>
+</head>
+
+<body>
+  <h2>首页</h2><br>
+  <div class="main-box">
+    <dialog id="new-thread-dialog">
+      <div>
+        <form>
+          <input type="text" name="Ttitle" id="Ttitle" maxlength="100" placeholder="Enter title">
+          <input type="text" name="Firstpost" id="Firstpost" maxlength="100" placeholder="First post">
+        </form>
+        <input type="button" name="log" id="cancel-button" value="cancel" onclick="postFunc('cancel')">
+        <input type="button" name="log" id="submit-button" value="submit" onclick="postFunc('submit')">
+      </div>
+
+    </dialog>
+    <div class="items">
+      <div class="inline-box-left">Threads: </div>
+      <div class="inline-box-right"><button onclick="addNewThread()">New thread</button></div>
+    </div>
+    <div class="threads-box" id="threads-box">
+      <ol id="threads-box-ol">
+      </ol>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script>
+    const apiHost = "http://127.0.0.1:7777"
+    const addThreadDialog = document.getElementById("new-thread-dialog")
+    const threadsOl = document.getElementById("threads-box-ol")
+
+    $(function () {
+      getAllThreads()
+    });
+
+
+    function getAllThreads() {
+      // get all threads
+      threadsOl.innerHTML = ""
+      $.get(apiHost + "/api/threads", function (result) {
+        allThreads = result
+        allThreads.forEach(function (item) {
+          var para = document.createElement("li");//创建需要增加的元素节点
+          para.innerText = item.icon + " | " + item.thread_title
+          para.setAttribute("class", "thread-line")
+          para.setAttribute("click", "clickThread(" + item.id + ")")
+          para.addEventListener("click", function (e) {
+            const username = getUrlParameter("username")
+            window.location.href = "./thread.html?postid=" + item.id + "&username=" + username;
+          }, false)
+          threadsOl.appendChild(para)
+        })
+      })
+    }
+
+    function addNewThread() {
+      addThreadDialog.showModal()
+    }
+
+    function postFunc(val) {
+
+      if (val === 'cancel') {
+        addThreadDialog.close()
+        return
+      }
+      const username = getUrlParameter("username")
+      const title = document.getElementById("Ttitle").value;
+      const firstPost = document.getElementById("Firstpost").value;
+      if (title == "" || title == null || title == undefined) {
+        alert("Thread title can not be empty")
+        return
+      }
+      if (firstPost == "" || firstPost == null || firstPost == undefined) {
+        alert("firstPost can not be empty")
+        return
+      }
+      if (username == "" || username == null || username == undefined) {
+        alert("username can not be empty, Please jump from the right place!")
+        return
+      }
+      $.ajax({
+        type: "post",
+        url: apiHost + '/api/threads',
+        async: false,
+        data: JSON.stringify({
+          "thread_title": title,
+          "text": firstPost,
+          "user": getUrlParameter("username"),
+          "icon": "fa-cloud"
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          addThreadDialog.close()
+          alert('Successfully added')
+          getAllThreads()
+        }
+      })
+
+    }
+
+    function getUrlParameter(name) {
+      name = name.replace(/[]/, "\[").replace(/[]/, "\[").replace(/[]/, "\\\]")
+      var regexS = "[\\?&]" + name + "=([^&#]*)"
+      var regex = new RegExp(regexS)
+      var results = regex.exec(window.parent.location.href)
+      if (results == null)
+        return ""
+      else {
+        return results[1]
+      }
+    }
+  </script>
+</body>
+
+</html>
+<style>
+  .items {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .main-box {
+    height: 400px;
+    width: 400px;
+    margin: 10px auto;
+  }
+
+  .threads-box {
+    margin-top: 10px;
+    width: 400px;
+    height: 300px;
+    border: 1px red solid;
+  }
+
+  .inline-box-left {
+    justify-content: space-between;
+
+    /* float: left; */
+    /* margin-left: 50px; */
+  }
+
+  .inline-box-right {
+    justify-content: space-between;
+
+    /* float: right; */
+    /* margin-left: 50px; */
+  }
+
+  .thread-line {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+  }
+</style>
