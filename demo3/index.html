@@ -1,0 +1,132 @@
+<html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>login page</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+</head>
+
+<body>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Thread title:</label>
+              <input type="text" class="form-control" id="recipient-name">
+            </div>
+            <div class="mb-3">
+              <label for="message-text" class="col-form-label">First post:</label>
+              <textarea class="form-control" id="message-text"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="createNewThread()">create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin-top: 30px;">
+    <div class="row">
+      <div class="col">
+        Threads:
+      </div>
+      <div class="col">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+          data-bs-whatever="@fat">New Thread</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="row" style="height: 400px; overflow: auto; margin-top: 20px;">
+        <div class="col-10">
+          <div class="list-group" id="listThreads" role="tablist">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    (function ($) {
+      $.getUrlParam
+        = function (name) {
+          var reg
+            = new RegExp("(^|&)" +
+              name + "=([^&]*)(&|$)");
+          var r
+            = window.location.search.substr(1).match(reg);
+          if (r != null) return unescape(r[2]); return null;
+        }
+    })(jQuery);
+  </script>
+  <script>
+    const apiAddress = "http://127.0.0.1:7777"
+
+    $().ready(function () {
+      all_threads()
+    })
+
+    var all_threads = function () {
+      // get all threads
+      $('#listThreads').empty()
+      $.get(apiAddress + "/api/threads", function (response) {
+        Threads = response
+        Threads.forEach(function (item) {
+          var li = $(`<a href="./posts.html?thread_id=${item.id}&username=${$.getUrlParam('username')}" class="list-group-item list-group-item-action" id="list-home-list">Home</a>`).text(item.thread_title)
+          $('#listThreads').append(li)
+        })
+      })
+    }
+
+    function createNewThread(val) {
+      const username = $.getUrlParam('username')
+      const title = $('#recipient-name').val();
+      const firstPost = $('#message-text').val();
+      if (title == "" || title == null || title == undefined) {
+        alert("Thread title can not be empty")
+        return
+      }
+      if (firstPost == "" || firstPost == null || firstPost == undefined) {
+        alert("firstPost can not be empty")
+        return
+      }
+      if (username == "" || username == null || username == undefined) {
+        alert("username can not be empty, Please jump from the right place!")
+        return
+      }
+      $.ajax({
+        type: "post",
+        url: apiAddress + '/api/threads',
+        async: false,
+        data: JSON.stringify({
+          "thread_title": title,
+          "text": firstPost,
+          "user": username,
+          "icon": "H"
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          alert('Successfully added')
+          all_threads()
+        }
+      })
+
+    }
+
+  </script>
+</body>
+
+</html>
