@@ -1,0 +1,278 @@
+<html>
+
+<head>
+  <title>threads</title>
+
+</head>
+
+<body>
+
+  <div>
+    <span>Threads: </span>
+    <span style="margin-left: 150px;"><button onclick="showDialogThread()">New Thread</button></span>
+  </div>
+  <div class="threads">
+    <ul id="threads-ul">
+    </ul>
+  </div>
+  <div>
+
+    <div id="bodyHide"
+      style="display:none;position:absolute;left:0px;top:0px;width:100%;height:100%;filter:Alpha(Opacity=30);opacity:0.3;background-color:#000000;z-index:101;">
+    </div>
+    <div id="dialog" style="display:none;z-index:9999;border:#000000 0px solid; width:500px; position: absolute;">
+      <div id="title" style="width: 100%; height: 30px; background-color: #999999;">
+        <a href='javascript:void(0);' onclick='deleteThread();'
+          style="text-decoration:none; color:#ffffff; font-weight:bold; float:left; margin-right:10px; margin-top:5px;">Delete</a>
+        <a href='javascript:void(0);' onclick='hideDialog();'
+          style="text-decoration:none; color:#ffffff; font-weight:bold; float:right; margin-right:10px; margin-top:5px;">关闭</a>
+      </div>
+      <div style="background-color: #ffffff;width: 100%; height: 300px; overflow: auto;" id="postBox">
+
+      </div>
+      <div>
+        <span><input id="postInput"></span>
+        <span><button onclick="addPost()">Post</button></span>
+      </div>
+    </div>
+
+
+    <div id="dialog_thread"
+      style="display:none;z-index:9999;border:#000000 0px solid; width:500px; position: absolute;">
+      <div id="title" style="width: 100%; height: 30px; background-color: #999999;">
+        <a href='javascript:void(0);' onclick='hideDialogThread();'
+          style="text-decoration:none; color:#ffffff; font-weight:bold; float:right; margin-right:10px; margin-top:5px;">关闭</a>
+      </div>
+      <div style="background-color: #ffffff;width: 100%; height: 300px; overflow: auto;" id="postBox">
+        <p><input id="threadTitleInput"></p>
+        <p><input id="threadFirstPost"></p>
+        <p><button onclick="addThread()">submit</button></p>
+      </div>
+    </div>
+
+  </div>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+    var UL = document.getElementById("threads-ul")
+    var postBox = document.getElementById("postBox")
+    var currentThreadID = null
+    var currentThreadUser = null
+    var intervalID = null
+
+    function showDialog(threadID) {
+      $('#bodyHide').show();
+      //显示在屏幕中间
+      $('#dialog').css('left', $(window).width() / 2 - $('#dialog').width() / 2);
+      $('#dialog').css('top', $(window).height() / 2 - $('#dialog').height() / 2);
+      $('#dialog').show();
+      currentThreadID = threadID
+      getAllPosts(threadID)
+
+      intervalID = setInterval(getAllPosts, 1000 * 10)
+    }
+
+    function hideDialog() {
+      $('#bodyHide').hide();
+      $('#dialog').hide();
+      clearInterval(intervalID);
+    }
+
+    function showDialogThread() {
+      $('#bodyHide').show();
+      //显示在屏幕中间
+      $('#dialog_thread').css('left', $(window).width() / 2 - $('#dialog').width() / 2);
+      $('#dialog_thread').css('top', $(window).height() / 2 - $('#dialog').height() / 2);
+      $('#dialog_thread').show();
+    }
+
+    function hideDialogThread() {
+      $('#bodyHide').hide();
+      $('#dialog_thread').hide();
+    }
+
+    function getQueryVariable(variable) {
+      var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        if (pair[0] == variable) { return pair[1]; }
+      }
+      return (false);
+    }
+  </script>
+  <script>
+    var http = {};
+    http.quest = function (option, callback) {
+      var url = option.url;
+      var method = option.method;
+      var contentType = option.contentType;
+      var data = option.data;
+      var timeout = option.timeout || 0;
+      var xhr = new XMLHttpRequest();
+      (timeout > 0) && (xhr.timeout = timeout);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+          if (xhr.status >= 200 && xhr.status < 400) {
+            var result = xhr.responseText;
+            try { result = JSON.parse(xhr.responseText); } catch (e) { }
+            callback && callback(null, result);
+          } else {
+            callback && callback('status: ' + xhr.status);
+          }
+        }
+      }.bind(this);
+      xhr.open(method, url, true);
+      if (contentType) {
+        xhr.setRequestHeader("Content-Type", contentType);
+      }
+      if (typeof data === 'object') {
+        try {
+          data = JSON.stringify(data);
+        } catch (e) { }
+      }
+      xhr.send(data);
+      xhr.ontimeout = function () {
+        callback && callback('timeout');
+        console.log('%c连%c接%c超%c时', 'color:red', 'color:orange', 'color:purple', 'color:green');
+      };
+    };
+    http.get = function (url, callback) {
+      var option = url.url ? url : { url: url };
+      option.method = 'get';
+      this.quest(option, callback);
+    };
+    http.post = function (option, callback) {
+      option.method = 'post';
+      option.contentType = 'application/json; charset=utf-8'
+      this.quest(option, callback);
+    };
+  </script>
+  <script>
+
+
+    window.onload = function () {
+      // 页面加载好了，执行什么的函数
+      allThreadsHandel()
+    }
+
+    var allThreadsHandel = function () {
+      // 获取所有thread
+      UL.innerText = ""
+      http.get("http://127.0.0.1:7777/api/threads", function (err, result) {
+        for (let i = 0; i < result.length; i++) {
+          const item = result[i]
+          const li = document.createElement('li')
+          const lia = document.createElement('a')
+          lia.setAttribute('href', 'javascript:void(0);')
+          lia.innerText = item.thread_title;
+          lia.addEventListener("click", function (e) {
+            const username = getQueryVariable("username")
+            showDialog(item.id);
+          }, false)
+          li.appendChild(lia)
+          UL.appendChild(li)
+        }
+      })
+    }
+
+    var getAllPosts = function (threadID) {
+      // 获取所有的post
+      if (threadID === '' || threadID === null || threadID === undefined) {
+        threadID = currentThreadID
+      }
+      postBox.innerHTML = ""
+      postBox.innerText = ""
+      http.get("http://127.0.0.1:7777/api/threads/" + threadID, function (err, result) {
+        for (let i = 0; i < result['posts'].length; i++) {
+          const item = result['posts'][i]
+          const p = document.createElement('p')
+          p.innerHTML = item.text + "<br>" + "- " + item.user
+          postBox.appendChild(p)
+        }
+        currentThreadUser = result.user
+      })
+    }
+
+    var addPost = function () {
+
+      const content = document.getElementById("postInput").value
+      if (content === '' || content === undefined || content === null) {
+        alert('please input text')
+        return
+      }
+
+      http.post({
+        url: `http://127.0.0.1:7777/api/threads/${currentThreadID}/posts`, data: JSON.stringify({
+          user: getQueryVariable("username"),
+          text: content
+        }), timeout: 1000
+      }, function (err, result) {
+        getAllPosts(currentThreadID)
+      });
+    }
+
+    var deleteThread = function () {
+      if (currentThreadID === '' || currentThreadID === null || currentThreadID === undefined) {
+        alert('thread id is null')
+        return
+      }
+
+      const username = getQueryVariable("username")
+      if (currentThreadUser !== username) {
+        alert("You cannot delete a thread that is not created by yourself")
+        return
+      }
+
+      $.ajax({
+        url: "http://127.0.0.1:7777/api/threads/" + currentThreadID,
+        type: "DELETE",
+        data: JSON.stringify({
+          "user": username,
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          alert("Delete success")
+          hideDialog()
+          allThreadsHandel()
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          alert("You cannot delete a thread that is not created by yourself")
+
+        }
+      });
+    }
+
+    var addThread = function () {
+      const title = document.getElementById('threadTitleInput').value
+      const firstPost = document.getElementById("threadFirstPost").value
+      if (title === '' || title === null || title === undefined) {
+        alert('thread title is null')
+        return
+      }
+      if (firstPost === '' || firstPost === null || firstPost === undefined) {
+        alert('thread firstPost is null')
+        return
+      }
+
+      http.post({
+        url: `http://127.0.0.1:7777/api/threads`, data: JSON.stringify({
+          user: getQueryVariable("username"),
+          thread_title: title,
+          text: firstPost,
+          icon: 'A'
+        }), timeout: 1000
+      }, function (err, result) {
+        allThreadsHandel()
+      });
+
+
+
+    }
+  </script>
+</body>
+
+</html>
+<style>
+  .threads {}
+</style>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>login page</title>
+  <style>
+    html {
+      background-color: #B5DEF2;
+    }
+
+    .wrapper {
+      margin: 140px 0 140px auto;
+      width: 884px;
+    }
+
+    .loginBox {
+      background-color: #F0F4F6;
+      /*上divcolor*/
+      border: 1px solid #BfD6E1;
+      border-radius: 5px;
+      color: #444;
+      font: 14px 'Microsoft YaHei', '微软雅黑';
+      margin: 0 auto;
+      width: 388px
+    }
+
+    .loginBox .loginBoxCenter {
+      border-bottom: 1px solid #DDE0E8;
+      padding: 24px;
+    }
+
+    .loginBox .loginBoxCenter p {
+      margin-bottom: 10px
+    }
+
+    .loginBox .loginBoxButtons {
+      /*background-color: #F0F4F6;*/
+      /*下divcolor*/
+      border-top: 0px solid #FFF;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+      line-height: 28px;
+      overflow: hidden;
+      padding: 20px 24px;
+      vertical-align: center;
+      filter: alpha(Opacity=80);
+      -moz-opacity: 0.5;
+      opacity: 0.5;
+    }
+
+    .loginBox .loginInput {
+      border: 1px solid #D2D9dC;
+      border-radius: 2px;
+      color: #444;
+      font: 12px 'Microsoft YaHei', '微软雅黑';
+      padding: 8px 14px;
+      margin-bottom: 8px;
+      width: 310px;
+    }
+
+    .loginBox .loginInput:FOCUS {
+      border: 1px solid #B7D4EA;
+      box-shadow: 0 0 8px #B7D4EA;
+    }
+
+    .loginBox .loginBtn {
+      background-image: -moz-linear-gradient(to bottom, blue, #85CFEE);
+      border: 1px solid #98CCE7;
+      border-radius: 20px;
+      box-shadow: inset rgba(255, 255, 255, 0.6) 0 1px 1px, rgba(0, 0, 0, 0.1) 0 1px 1px;
+      color: #444;
+      /*登录*/
+      cursor: pointer;
+      float: right;
+      font: bold 13px Arial;
+      padding: 10px 50px;
+    }
+
+    .loginBox .loginBtn:HOVER {
+      background-image: -moz-linear-gradient(to top, blue, #85CFEE);
+    }
+
+    .loginBox a.forgetLink {
+      color: #ABABAB;
+      cursor: pointer;
+      float: right;
+      font: 11px/20px Arial;
+      text-decoration: none;
+      vertical-align: middle;
+      /*忘记密码*/
+    }
+
+    .loginBox a.forgetLink:HOVER {
+      color: #000000;
+      text-decoration: none;
+      /*忘记密码*/
+    }
+
+    .loginBox input#remember {
+      vertical-align: middle;
+    }
+
+    .loginBox label[for="remember"] {
+      font: 11px Arial;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="loginBox">
+      <form>
+
+        <div class="loginBoxCenter">
+          <p><label for="username">username：</label></p>
+          <p><input type="text" id="inputUsername" name="text" class="loginInput" autofocus="autofocus"
+              required="required" autocomplete="off" placeholder="Please input username" value="" /></p>
+
+        </div>
+
+      </form>
+      <div class="loginBoxButtons">
+        <button class="loginBtn" id="loginBtn" onclick="loginHandle()">login</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    var http = {};
+    http.quest = function (option, callback) {
+      var url = option.url;
+      var method = option.method;
+      var data = option.data;
+      var timeout = option.timeout || 0;
+      var xhr = new XMLHttpRequest();
+      (timeout > 0) && (xhr.timeout = timeout);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+          if (xhr.status >= 200 && xhr.status < 400) {
+            var result = xhr.responseText;
+            try { result = JSON.parse(xhr.responseText); } catch (e) { }
+            callback && callback(null, result);
+          } else {
+            callback && callback('status: ' + xhr.status);
+          }
+        }
+      }.bind(this);
+      xhr.open(method, url, true);
+      if (typeof data === 'object') {
+        try {
+          data = JSON.stringify(data);
+        } catch (e) { }
+      }
+      xhr.send(data);
+      xhr.ontimeout = function () {
+        callback && callback('timeout');
+        console.log('%c连%c接%c超%c时', 'color:red', 'color:orange', 'color:purple', 'color:green');
+      };
+    };
+    http.get = function (url, callback) {
+      var option = url.url ? url : { url: url };
+      option.method = 'get';
+      this.quest(option, callback);
+    };
+    http.post = function (option, callback) {
+      option.method = 'post';
+      this.quest(option, callback);
+    };
+  </script>
+  <script>
+    var usernames = []
+    var names = []
+
+    window.onload = function () {
+      // 页面加载好了，执行什么的函数
+      allUser()
+    }
+
+    var loginHandle = function () {
+      // 登录操作函数
+      console.log('begin')
+      const inputUsername = document.getElementById("inputUsername").value
+      if (inputUsername === '' || inputUsername === undefined || inputUsername === null) {
+        alert('please input usernmae')
+        return
+      }
+
+      if (usernames.indexOf(inputUsername) < 0) {
+        alert('username non-existent')
+        return
+      }
+
+      window.location.replace(`./threads.html?username=${inputUsername}&name=${names[usernames.indexOf(inputUsername)]}`)
+
+    }
+
+    var allUser = function () {
+      http.get("http://127.0.0.1:7777/api/users", function (err, result) {
+        for (let i = 0; i < result.length; i++) {
+          usernames.push(result[i]['username'])
+          names.push(result[i]['name'])
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>
