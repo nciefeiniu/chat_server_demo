@@ -1,0 +1,131 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threads</title>
+  <style>
+    .mycss {
+      position: absolute;
+      left: 0px;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      height: 400px;
+      width: 400px;
+      border: 1px rosybrown solid;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <dialog id="new-post-dialog">
+    <input id="inputTitle" placeholder="new thread title" />
+    <input id="inputContent" placeholder="new thread first post" />
+    <button onclick="closeDialog()">Cancel</button>
+    <button onclick="createThread()">Create</button>
+  </dialog>
+  <div id="loginName"></div>
+  <div class="mycss">
+    <span style="float: left;">Threads: </span>
+    <span style="float: right;"><button onclick="openNewThreadDialog()">添加</button></span>
+    <br />
+    <ul id="threads-ul">
+
+    </ul>
+  </div>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+    var userName = null;
+
+    jQuery.extend({
+      'getAllThreads': function (username) {
+        $.ajax({
+          url: 'http://127.0.0.1:7777/api/threads',
+          method: 'GET',
+          success: function (res) {
+            // 成功
+            const ulNode = $('#threads-ul')
+            ulNode.empty()
+            res.forEach(element => {
+              let liNode = $('<li></li>')
+              liNode.append($(`<a href="./post.html?username=${username}&user=${GetQueryString('name')}&origin_user=${element.user}&id=${element.id}"></a>`).text(element.thread_title))
+              ulNode.append(liNode)
+            })
+          },
+          error: function (err) {
+            // 失败
+            console.log(err)
+          }
+        })
+      }
+    })
+
+    $(function () {
+      userName = GetQueryString('username')
+
+      $('#loginName').text(function (i, origText) {
+        return "Welcome " + GetQueryString('name')
+      })
+
+      $.getAllThreads(userName);
+    })
+
+    function openNewThreadDialog() {
+      console.log('wafawf')
+      $('#new-post-dialog').show()
+    }
+
+    function closeDialog() {
+      $('#new-post-dialog').hide()
+    }
+
+    function GetQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]); return null;
+    }
+
+    function createThread() {
+      title = $('#inputTitle').val()
+      firstPost = $('#inputContent').val()
+      if (title.length <= 0) {
+        alert('Thread title can not be empty')
+        return
+      }
+      if (firstPost.length <= 0) {
+        alert('first post can not be empty')
+        return
+      }
+
+      $.ajax({
+        url: 'http://127.0.0.1:7777/api/threads',
+        method: 'POST',
+        contentType: "application/json",
+        data: JSON.stringify({
+          'user': userName,
+          'thread_title': title,
+          'icon': 'X',
+          'text': firstPost
+        }),
+        success: function (res) {
+          // 成功
+          alert('Success create a new Thread')
+          $.getAllThreads(userName);
+          closeDialog();
+        },
+        error: function (err) {
+          // 失败
+          console.log(err)
+        }
+      })
+
+
+    }
+  </script>
+</body>
+
+</html>

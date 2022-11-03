@@ -1,0 +1,163 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threads</title>
+  <style>
+    .mycss {
+      position: absolute;
+      left: 0px;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      height: 400px;
+      width: 400px;
+      border: 1px rosybrown solid;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <dialog id="new-post-dialog">
+    <div>Are you sure you want to delete?</div>
+    <button onclick="closeDialog()">Cancel</button>
+    <button onclick="deleteThread()">Delete</button>
+  </dialog>
+  <div id="loginName"></div>
+  <div class="mycss">
+    <span style="float: right;"><button onclick="openDialog()">Delete</button></span>
+
+    <ul id="threads-ul" style="height: 340px;">
+    </ul>
+    <div>
+      <span style="float: left;"><input id="inputPostText" placeholder="post text" style="width: 300px;" /></span>
+      <span style="float: right;"><button onclick="sendPost()">POST</button></span>
+    </div>
+  </div>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+    var userName = null;
+    var threadID = null;
+
+    jQuery.extend({
+      'getAllPosts': function (id) {
+        // 获取所有Post
+        $.ajax({
+          url: 'http://127.0.0.1:7777/api/threads/' + id,
+          method: 'GET',
+          success: function (res) {
+            // 成功
+            const ulNode = $('#threads-ul')
+            ulNode.empty()
+            res.posts.forEach(element => {
+              let liNode = $('<li></li>')
+              liNode.append($(`<text></text>`).text(element.text))
+              liNode.append($(`<text></text>`).text('  - ' + element.user))
+              liNode.append($(`<br></br>`))
+              ulNode.append(liNode)
+            })
+          },
+          error: function (err) {
+            // 失败
+            console.log(err)
+          }
+        })
+      },
+      'newPost': function (id) {
+        // 发送POST
+        const text = $('#inputPostText').val()
+        if (text.length <= 0) {
+          alert('message can not be empty')
+          return
+        }
+        $.ajax({
+          url: `http://127.0.0.1:7777/api/threads/${id}/posts`,
+          method: 'POST',
+          contentType: "application/json",
+          data: JSON.stringify({
+            'user': userName,
+            'text': text
+          }),
+          success: function (res) {
+            // 成功
+            $.getAllPosts(threadID);
+          },
+          error: function (err) {
+            // 失败
+            console.log(err)
+          }
+        })
+      },
+      'delThread': function (id) {
+        // 删除这个Thread的方法
+        $.ajax({
+          url: `http://127.0.0.1:7777/api/threads/${id}`,
+          method: 'DELETE',
+          contentType: "application/json",
+          data: JSON.stringify({
+            'user': userName,
+          }),
+          success: function (res) {
+            // 成功
+            alert('Success delete this Thread')
+            window.history.back(-1);
+          },
+          error: function (err) {
+            // 失败
+            console.log(err)
+          }
+        })
+      }
+    })
+
+    $(function () {
+      // 页面加载完成后就执行
+      userName = GetQueryString('username')
+      threadID = GetQueryString('id')
+
+      $('#loginName').text(function (i, origText) {
+        return "Welcome " + GetQueryString('user')
+      })
+
+      $.getAllPosts(threadID);
+    })
+
+    function openDialog() {
+      // 打开弹出
+      console.log('wafawf')
+      $('#new-post-dialog').show()
+    }
+
+    function closeDialog() {
+      // 关闭弹出
+      $('#new-post-dialog').hide()
+    }
+
+    function sendPost() {
+      // 发送新的POST
+      console.log('afwaf')
+      $.newPost(threadID);
+    }
+    function deleteThread() {
+      // 删除这个Thread
+      if (userName === GetQueryString('origin_user')) {
+        $.delThread(threadID)
+      } else {
+        alert('No permission')
+      }
+    }
+
+
+    function GetQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]); return null;
+    }
+  </script>
+</body>
+
+</html>
