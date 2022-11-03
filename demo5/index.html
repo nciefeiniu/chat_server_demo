@@ -1,0 +1,399 @@
+<html>
+
+<head>
+  <title>Login Page</title>
+  <link rel="stylesheet" type="text/css" href="https://layui.itze.cn/layui-v2.6.8/layui/css/layui.css" />
+
+</head>
+
+<body>
+  <div class="limiter">
+    <div class="containter">
+      <div class="wraper">
+        <span class="login-form-title p-b-26" id="helloText">Welcome</span>
+        <div style="float: right;"><button onclick="openlayer()">New Thread</button></div>
+        <div>Threads:
+        </div>
+        <div id="threads-box">
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
+
+  <script>
+    var icons = ['&#9748', '&#9748', '&#9749', '&#9752', '&#9762', '&#9766', '&#9774', '&#9786', '&#9785']
+
+    var getUrlParameter = function getUrlParameter(sParam) {
+      var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+      for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+          return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+      }
+      return false;
+    };
+
+    var getAllThreads = () => {
+      $.get("http://127.0.0.1:7777/api/threads", function (data, status) {
+        const threadBox = $('#threads-box')
+        threadBox.empty()
+        data.forEach(item => {
+          let div = $('<div></div>')
+          div.append($(`<a href="./chat.html?username=${username}&user=${name}&origin_user=${item.user}&id=${item.id}"></a>`).text(item.icon + '   ' + item.thread_title))
+          threadBox.append(div)
+        })
+      });
+    }
+
+
+    var createNewThread = (_title, _first_post) => {
+      　　　　let index = Math.floor((Math.random()*icons.length))
+
+      $.ajax({
+        url: 'http://127.0.0.1:7777/api/threads',
+        type: "POST",
+        data: JSON.stringify({
+          user: username,
+          thread_title: _title,
+          icon: icons[index],
+          text: _first_post
+        }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (res) {
+          getAllThreads()
+        },
+        error: function (err) {
+          // 失败
+          console.log(err)
+        }
+      })
+    }
+
+    var openlayer = () => {
+      layui.use('layer', function () {
+        var layer = layui.layer;
+        layer.open({
+          title: 'create new thread',
+          content: '<input class="input" id="username-input" placeholder="Title"/> <input class="input" id="firstpost-input" placeholder="first post"/>'
+          , btn: ['Submit', 'Cancel']
+          , yes: function (index, layero) {
+            //按钮【按钮一】的回调
+
+            const title = $('#username-input').val()
+            const firstpost = $('#firstpost-input').val()
+            if (title.length <= 0 || firstpost.length <= 0) {
+              layer.msg('Incomplete data');
+            } else {
+              createNewThread(title, firstpost)
+              layer.close(layer.index)
+            }
+          }
+          , btn2: function (index, layero) {
+            //按钮【按钮二】的回调
+
+            //return false 开启该代码可禁止点击该按钮关闭
+          }
+          , cancel: function () {
+            //右上角关闭回调
+
+            //return false 开启该代码可禁止点击该按钮关闭
+          }
+        });
+      });
+    }
+  </script>
+  <script>
+    var username = null
+    var name = null
+
+    $(function () {
+      username = getUrlParameter('username')
+      name = getUrlParameter('name')
+
+      $('#helloText').text(() => {
+        return "Welcome " + name
+      })
+
+      getAllThreads();
+    })
+
+    $("#loginButton").click(function () {
+      const username = $('#username-input').val()
+
+      let loginSuccess = false
+      $.get("http://127.0.0.1:7777/api/users", function (data, status) {
+        data.forEach(item => {
+          if (item.username === username) {
+            $(location).attr('href', './index.html?username=' + item.username + '&name=' + item.user);
+            loginSuccess = true
+          }
+        })
+
+        if (loginSuccess === false) {
+          alert(`"${username}" The account does not exist`)
+
+        }
+
+      });
+    });
+  </script>
+</body>
+
+</html>
+<style>
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .limiter {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  body {
+    font-weight: 400;
+  }
+
+  .containter {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f2f2f2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 13px;
+  }
+
+  .wraper {
+    width: 490px;
+    min-height: 100vh;
+    background: white;
+    box-shadow: 0 5px 7px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .validate-form {
+    width: 100%;
+  }
+
+  .login-form-title {
+    display: block;
+    line-height: 1.2;
+    font-weight: bolder;
+    font-size: 30px;
+    text-align: center;
+    color: #333333;
+  }
+
+  @media (max-width: 576px) {
+    .wraper {
+      padding: 77px 15px 33px 15px;
+    }
+  }
+
+  @media (min-width: 577px) {
+    .wraper {
+      padding: 77px 55px 33px 55px;
+    }
+  }
+
+  input {
+    outline: none;
+    border: none;
+    width: 100%;
+  }
+
+  .p-b-26 {
+    padding-bottom: 126px;
+  }
+
+  .wrap-input {
+    position: relative;
+    border-bottom: 2px solid #adadad;
+    margin-bottom: 40px;
+  }
+
+  .input {
+    font-size: 15px;
+    color: #555555;
+    line-height: 1.2;
+    display: block;
+    width: 100%;
+    height: 45px;
+    background: transparent;
+    overflow: visible;
+  }
+
+  ::after,
+  ::before {
+    box-sizing: inherit;
+  }
+
+  .focus-input {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  .focus-input::before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    transition: all 0.4s;
+    background: -webkit-linear-gradient(left, #21d4fd, #b721ff);
+  }
+
+  .focus-input::after {
+    font-size: 15px;
+    color: #999999;
+    line-height: 1.2;
+    content: attr(data-placeholder);
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 16px;
+    left: 0px;
+    padding-left: 5px;
+    transition: all 0.4s;
+  }
+
+  .input:focus+.focus-input::after {
+    top: -15px;
+  }
+
+  .input:focus+.focus-input::before {
+    width: 100%;
+  }
+
+  .has-val.input+.focus-input::after {
+    top: -15px;
+  }
+
+  .has-val.input+.focus-input::before {
+    width: 100%;
+  }
+
+  .m-b-15 {
+    margin-bottom: 60px;
+  }
+
+  .login-form-button {
+    font-size: 15px;
+    color: #fff;
+    outline: none !important;
+    border: none;
+    line-height: 1.2;
+    text-transform: uppercase;
+    display: flex;
+    background: -webkit-linear-gradient(left, #21d4fd, #b721ff);
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    padding: 0px 20px;
+    width: 100%;
+    height: 50px;
+  }
+
+  .signup-link {
+    margin-top: 100px;
+    text-align: center;
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .signup-link a {
+    text-decoration: none;
+    color: black;
+  }
+
+  .switch-container {
+    width: 100%;
+    display: flex;
+    padding-top: 2rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 280px;
+    height: 54px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    top: 0;
+    content: 'Login';
+    bottom: 0;
+    left: 0;
+    right: 0;
+    cursor: pointer;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+    background-color: #ccc;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: 'Sign Up';
+    text-align: center;
+    height: 46px;
+    line-height: 2.7;
+    width: 132px;
+    top: 4px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  .toggle-input:checked+.slider:before {
+    -webkit-transform: translateX(138px);
+    transform: translateX(138px);
+    -ms-transform: translateX(138px);
+    content: 'Login';
+  }
+
+  .toggle-input:checked+.slider {
+    background-color: #2196f3;
+  }
+
+  .slider.border:before {
+    border-radius: 46px;
+  }
+
+  .slider.border {
+    border-radius: 46px;
+  }
+</style>

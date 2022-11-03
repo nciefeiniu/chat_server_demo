@@ -1,0 +1,293 @@
+<html>
+
+<head>
+  <title>Login Page</title>
+</head>
+
+<body>
+  <div class="limiter">
+    <div class="containter">
+      <div class="wraper">
+        <form class="validate-form">
+          <span class="login-form-title p-b-26">Welcome</span>
+          <div class="wrap-input">
+            <input class="input" id="username-input" placeholder="Title" />
+            <span class="focus-input" data-placeholder="UserName"></span>
+          </div>
+        </form>
+        <button id="loginButton" class="login-form-button">LOGIN</button>
+
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script>
+    $("#loginButton").click(function () {
+      const username = $('#username-input').val()
+
+      let loginSuccess = false
+      $.get("http://127.0.0.1:7777/api/users", function (data, status) {
+        data.forEach(item => {
+          if (item.username === username) {
+            $(location).attr('href', './index.html?username=' + item.username + '&name=' + item.name);
+            loginSuccess = true
+          }
+        })
+
+        if (loginSuccess === false) {
+          alert(`"${username}" The account does not exist`)
+
+        }
+
+      });
+    });
+  </script>
+</body>
+
+</html>
+<style>
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .limiter {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  body {
+    font-weight: 400;
+  }
+
+  .containter {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f2f2f2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 13px;
+  }
+
+  .wraper {
+    width: 490px;
+    min-height: 100vh;
+    background: white;
+    box-shadow: 0 5px 7px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .validate-form {
+    width: 100%;
+  }
+
+  .login-form-title {
+    display: block;
+    line-height: 1.2;
+    font-weight: bolder;
+    font-size: 30px;
+    text-align: center;
+    color: #333333;
+  }
+
+  @media (max-width: 576px) {
+    .wraper {
+      padding: 77px 15px 33px 15px;
+    }
+  }
+
+  @media (min-width: 577px) {
+    .wraper {
+      padding: 77px 55px 33px 55px;
+    }
+  }
+
+  input {
+    outline: none;
+    border: none;
+    width: 100%;
+  }
+
+  .p-b-26 {
+    padding-bottom: 126px;
+  }
+
+  .wrap-input {
+    position: relative;
+    border-bottom: 2px solid #adadad;
+    margin-bottom: 40px;
+  }
+
+  .input {
+    font-size: 15px;
+    color: #555555;
+    line-height: 1.2;
+    display: block;
+    width: 100%;
+    height: 45px;
+    background: transparent;
+    overflow: visible;
+  }
+
+  ::after,
+  ::before {
+    box-sizing: inherit;
+  }
+
+  .focus-input {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  .focus-input::before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    transition: all 0.4s;
+    background: -webkit-linear-gradient(left, #21d4fd, #b721ff);
+  }
+
+  .focus-input::after {
+    font-size: 15px;
+    color: #999999;
+    line-height: 1.2;
+    content: attr(data-placeholder);
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 16px;
+    left: 0px;
+    padding-left: 5px;
+    transition: all 0.4s;
+  }
+
+  .input:focus+.focus-input::after {
+    top: -15px;
+  }
+
+  .input:focus+.focus-input::before {
+    width: 100%;
+  }
+
+  .has-val.input+.focus-input::after {
+    top: -15px;
+  }
+
+  .has-val.input+.focus-input::before {
+    width: 100%;
+  }
+
+  .m-b-15 {
+    margin-bottom: 60px;
+  }
+
+  .login-form-button {
+    font-size: 15px;
+    color: #fff;
+    outline: none !important;
+    border: none;
+    line-height: 1.2;
+    text-transform: uppercase;
+    display: flex;
+    background: -webkit-linear-gradient(left, #21d4fd, #b721ff);
+    justify-content: center;
+    align-items: center;
+    border-radius: 100px;
+    padding: 0px 20px;
+    width: 100%;
+    height: 50px;
+  }
+
+  .signup-link {
+    margin-top: 100px;
+    text-align: center;
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .signup-link a {
+    text-decoration: none;
+    color: black;
+  }
+
+  .switch-container {
+    width: 100%;
+    display: flex;
+    padding-top: 2rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 280px;
+    height: 54px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    top: 0;
+    content: 'Login';
+    bottom: 0;
+    left: 0;
+    right: 0;
+    cursor: pointer;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+    background-color: #ccc;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: 'Sign Up';
+    text-align: center;
+    height: 46px;
+    line-height: 2.7;
+    width: 132px;
+    top: 4px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  .toggle-input:checked+.slider:before {
+    -webkit-transform: translateX(138px);
+    transform: translateX(138px);
+    -ms-transform: translateX(138px);
+    content: 'Login';
+  }
+
+  .toggle-input:checked+.slider {
+    background-color: #2196f3;
+  }
+
+  .slider.border:before {
+    border-radius: 46px;
+  }
+
+  .slider.border {
+    border-radius: 46px;
+  }
+</style>
