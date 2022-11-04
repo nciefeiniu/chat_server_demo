@@ -17,11 +17,12 @@
       width: 400px;
       border: 1px rosybrown solid;
       overflow: auto;
+      background-color: beige;
     }
   </style>
 </head>
 
-<body>
+<body style="background-image: linear-gradient(#e66465, #9198e5);">
   <dialog id="new-post-dialog">
     <input id="inputTitle" placeholder="new thread title" />
     <input id="inputContent" placeholder="new thread first post" />
@@ -31,7 +32,7 @@
   <div id="loginName"></div>
   <div class="mycss">
     <span style="float: left;">Threads: </span>
-    <span style="float: right;"><button onclick="openNewThreadDialog()">添加</button></span>
+    <span style="float: right;"><button onclick="openNewThreadDialog()">New Thread</button></span>
     <br />
     <ul id="threads-ul">
 
