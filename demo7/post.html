@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/theme-chalk/index.min.css" rel="stylesheet">
+  <title>Post Page</title>
+</head>
+
+<body>
+  <div id="app">
+    <el-container>
+      <el-header>Thread Title: {{threadTitle}}</el-header>
+      <el-main>
+        <div v-for=" row in postsData" style="text-align: left;">
+          <span>{{ row.text }}</span>
+          <el-divider content-position="left">{{ row.name}}</el-divider>
+        </div>
+      </el-main>
+      <el-footer>
+        <el-row>
+          <el-col :span="6">
+            <el-input type="textarea" :rows="2" placeholder="Please enter the content" v-model="postContent">
+            </el-input>
+          </el-col>
+          <el-col :span="6" style="text-align: left;">
+            <el-button type="success" @click="newPost">POST</el-button>
+          </el-col>
+          <el-col :span="6">
+          </el-col>
+          <el-col :span="6">
+          </el-col>
+        </el-row>
+      </el-footer>
+    </el-container>
+
+  </div>
+</body>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.13/vue.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/index.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.js"></script>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        postsData: [],
+        threadTitle: '',
+        postContent: ''
+      }
+    },
+    mounted() {
+      this.allPosts()
+      this.threadTitle = this.getUrlParameter('thread_title')
+
+      setInterval(this.allPosts, 1000 * 10)
+    },
+    methods: {
+      load() {
+        this.count += 2
+      },
+      async newPost() {
+        const _this = this
+        await axios.post('http://127.0.0.1:7777/api/threads/' + _this.getUrlParameter('id') + '/posts', JSON.stringify({
+          user: _this.getUrlParameter('username'),
+          text: _this.postContent,
+        }), {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        ).then(function (response) {
+        }).catch(function (error) {
+          console.log(error);
+        });
+        _this.postContent = "";
+        await this.allPosts()
+      },
+      getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+      },
+      allPosts() {
+        const _this = this
+        const ID = _this.getUrlParameter('id')
+        axios.get('http://127.0.0.1:7777/api/threads/' + ID + '/posts')
+          .then(function (response) {
+            // 处理成功情况
+            const data = response.data;
+            _this.postsData = data;
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+      }
+    }
+  })
+</script>
+
+</html>
+<style>
+  .el-header {
+    background-color: #67C23A;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+
+  .el-footer {
+    background-color: #909399;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    text-align: center;
+    height: 700px;
+    overflow: auto;
+    /* line-height: 160px; */
+  }
+
+  body>.el-container {
+    margin-bottom: 40px;
+  }
+
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }
+
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+</style>

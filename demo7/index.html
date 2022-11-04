@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/theme-chalk/index.min.css" rel="stylesheet">
+  <title>Index Page</title>
+</head>
+
+<body>
+  <div id="app">
+    <el-dialog title="Create Thread" :visible.sync="centerDialogVisible" width="30%" center>
+      <el-form :model="newThread">
+        <el-form-item label="title" label-width="120px">
+          <el-input v-model="newThread.title" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="First Post" label-width="120px">
+          <el-input v-model="newThread.firstPost" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="centerDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="createNewThread">确 定</el-button>
+      </span>
+    </el-dialog>
+    <div style="
+    width: 700px;
+    height: 100vh;
+    margin: 10% auto;
+">
+      <el-button type="primary" round @click="centerDialogVisible = true">New Thread</el-button>
+
+
+      <el-table
+        :data="tableData.filter(data => !search || data.thread_title.toLowerCase().includes(search.toLowerCase()))"
+        :row-class-name="tableRowClassName" style="width: 100%">
+        <el-table-column label="Thread ID" prop="id">
+        </el-table-column>
+        <el-table-column label="ThreadTitle" prop="thread_title">
+        </el-table-column>
+        <el-table-column label="Thread User" prop="user">
+        </el-table-column>
+        <el-table-column align="right">
+          <template slot="header" slot-scope="scope">
+            <span>
+              <el-input v-model="search" size="mini" placeholder="Enter keyword search" />
+            </span>
+          </template>
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">get into</el-button>
+            <el-popconfirm title="Are you sure you want to delete this?" icon="el-icon-info" icon-color="red"
+              confirm-button-text='Yes' cancel-button-text='Cancel' @confirm="handleDelete(scope.$index, scope.row)">
+              <el-button size="mini" type="danger" slot="reference">Delete</el-button>
+            </el-popconfirm>
+            <!-- <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button> -->
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.13/vue.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/index.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue-router/3.5.2/vue-router.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        tableData: [],
+        search: '',
+        centerDialogVisible: false,
+        newThread: {
+          title: '',
+          firstPost: '',
+        }
+      }
+    },
+    async mounted() {
+      await this.threads();
+    },
+    methods: {
+      async createNewThread() {
+        if (this.newThread.title.length <= 0) {
+          this.$notify.error({
+            title: 'Error',
+            message: 'Thread title cannot be empty'
+          });
+          return
+        }
+        if (this.newThread.firstPost.length <= 0) {
+          this.$notify.error({
+            title: 'Error',
+            message: 'firstpost cannot be empty'
+          });
+          return
+        }
+        const _this = this
+
+        await axios.post('http://127.0.0.1:7777/api/threads', JSON.stringify({
+          thread_title: _this.newThread.title,
+          user: _this.getUrlParameter('username'),
+          text: _this.newThread.firstPost,
+          icon: "👋"
+        }), {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        ).then(function (response) {
+          _this.centerDialogVisible = false
+        }).catch(function (error) {
+          console.log(error);
+        });
+        await _this.threads()
+      },
+      handleEdit(index, row) {
+        console.log(index, row);
+        window.location.href = './post.html?username=' + this.getUrlParameter('username') + '&' + this.formateObjToParamStr(row);
+      },
+      async handleDelete(index, row) {
+        console.log(index, row);
+        const _this = this
+
+        if (row.user !== _this.getUrlParameter('username')) {
+          _this.$notify.error({
+            title: 'Error',
+            message: 'You have no permission to delete the thread created by others'
+          });
+          return
+        }
+        await axios.delete('http://127.0.0.1:7777/api/threads/' + row.id, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: JSON.stringify({
+            'user': _this.getUrlParameter('username'),
+          }),
+        })
+        await _this.threads()
+      },
+      tableRowClassName({ row, rowIndex }) {
+        if (rowIndex === 1) {
+          return 'warning-row';
+        } else if (rowIndex === 3) {
+          return 'success-row';
+        }
+        return '';
+      },
+      async threads() {
+        const resopnse = await axios.get('http://127.0.0.1:7777/api/threads')
+        if (resopnse.status !== 200) {
+          this.$notify.error({
+            title: 'Error',
+            message: 'network error'
+          });
+        } else {
+          const data = resopnse.data;
+          this.tableData = data;
+        }
+      },
+      filter(str) { // 特殊字符转义
+        str += ''; // 隐式转换
+        str = str.replace(/%/g, '%25');
+        str = str.replace(/\+/g, '%2B');
+        str = str.replace(/ /g, '%20');
+        str = str.replace(/\//g, '%2F');
+        str = str.replace(/\?/g, '%3F');
+        str = str.replace(/&/g, '%26');
+        str = str.replace(/\=/g, '%3D');
+        str = str.replace(/#/g, '%23');
+        return str;
+      },
+
+      formateObjToParamStr(paramObj) {
+        const sdata = [];
+        for (let attr in paramObj) {
+          sdata.push(`${attr}=${this.filter(paramObj[attr])}`);
+        }
+        return sdata.join('&');
+      },
+      getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+      }
+    }
+  })
+</script>
+
+</html>
+
+<style scoped>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+</style>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/theme-chalk/index.min.css" rel="stylesheet">
+  <title>Login Page</title>
+</head>
+
+<body>
+  <div id="app">
+    <div class="dialog">
+      <div class="loginPage">
+        <h1>Login</h1>
+        <el-form>
+          <el-form-item label="username">
+            <el-input type="text" id="username" v-model="formName.username"
+              @blur="inputBlur('username',formName.username)">
+            </el-input>
+            <p>{{formName.userError}}</p>
+          </el-form-item>
+          <el-button type="primary" @click="submitForm" v-bind:disabled="formName.beDisabled">Submit
+          </el-button>
+          <el-button @click="resetForm">Reset</el-button>
+        </el-form>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.13/vue.js"></script>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.10/index.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/1.1.3/axios.js"></script>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        visible: false,
+        formName: {//表单中的参数
+          username: '',
+          userError: '',
+          beDisabled: true
+        },
+        beShow: false//传值给父组件
+      }
+    },
+    methods: {
+      submitForm() {
+        const _this = this
+        axios.get('http://127.0.0.1:7777/api/users')
+          .then(function (response) {
+            // 处理成功情况
+            const data = response.data
+            let userIsRight = false
+            let indexUrl = null
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].username === _this.formName.username) {
+                userIsRight = true
+                indexUrl = `./index.html?username=${data[i].username}&name=${data[i].name}`
+              }
+            }
+            if (userIsRight === true) {
+              window.location.href = indexUrl;
+            } else {
+              _this.$notify.error({
+                title: 'Error',
+                message: 'user name does not exist'
+              });
+            }
+          })
+          .catch(function (error) { // 请求失败处理
+            console.log(error);
+          });
+      },
+      resetForm: function () {
+        this.formName.username = '';
+        this.formName.userError = '';
+      },
+      inputBlur: function (errorItem, inputContent) {
+        if (errorItem === 'username') {
+          if (inputContent === '') {
+            this.formName.userError = 'User name cannot be empty'
+          } else {
+            this.formName.userError = '';
+          }
+        }
+        //对于按钮的状态进行修改
+        if (this.formName.username != '') {
+          this.formName.beDisabled = false;
+        } else {
+          this.formName.beDisabled = true;
+        }
+      }
+    }
+  })
+</script>
+
+</html>
+
+<style scoped>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+
+  .dialog {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .8);
+  }
+
+  .loginPage {
+    position: absolute;
+    top: 50%;
+    left: 40%;
+    /* margin-top: -150px; */
+    /* margin-left: -175px; */
+    width: 350px;
+    min-height: 300px;
+    padding: 30px 20px 20px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+  }
+
+  .loginPage p {
+    color: red;
+    text-align: left;
+  }
+</style>
