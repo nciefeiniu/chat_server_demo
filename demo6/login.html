@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+  <div id="app">
+    <!-- <el-button :plain="true" @click="open4">错误</el-button> -->
+
+    <div class="login" clearfix>
+      <div class="login-wrap">
+        <el-row type="flex" justify="center">
+          <el-form ref="loginForm" :model="user" status-icon label-width="80px">
+            <h3>Login</h3>
+            <hr>
+            <el-form-item prop="username" label="UserName">
+              <el-input v-model="user.username" placeholder="Please input username" prefix-icon></el-input>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-upload" @click="doLogin()">Login</el-button>
+            </el-form-item>
+          </el-form>
+        </el-row>
+      </div>
+    </div>
+  </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- import axios -->
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+  // const axios = require('axios');
+
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        visible: false,
+        user: { username: '', }
+      }
+    },
+    methods: {
+      async doLogin() {
+        const _this = this
+        if (_this.user.username.length <= 0) {
+          _this.$message.error('User name cannot be empty');
+          return
+        }
+        axios.get('http://127.0.0.1:7777/api/users')
+          .then(function (response) {
+            // 处理成功情况
+
+            response.data.forEach(item => {
+              if (item.username === _this.user.username) {
+                window.location.assign("./index.html?username=" + item.username + "&name=" + item.name)
+              }
+            });
+
+            _this.$message.error('The user does not exist');
+
+
+          })
+          .catch(function (error) {
+            // 处理错误情况
+            _this.$message.error(error);
+          });
+      }
+    }
+  })
+</script>
+
+</html>
+
+<style scoped>
+  .login {
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(#e66465, #9198e5);
+    background-size: cover;
+    overflow: hidden;
+    position: absolute;
+
+  }
+
+  .login-wrap {
+    background: white;
+    background-size: cover;
+    width: 400px;
+    height: 300px;
+    margin: 215px auto;
+    overflow: hidden;
+    padding-top: 10px;
+    line-height: 40px;
+  }
+
+  #password {
+    margin-bottom: 5px;
+  }
+
+  h3 {
+    color: #0babeab8;
+    font-size: 24px;
+  }
+
+  hr {
+    background-color: #444;
+    margin: 20px auto;
+  }
+
+  a {
+    text-decoration: none;
+    color: #aaa;
+    font-size: 15px;
+  }
+
+  a:hover {
+    color: coral;
+  }
+
+  .el-button {
+    width: 80%;
+    margin-left: -50px;
+  }
+</style>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+  <div id="app">
+
+    <el-dialog title="Create Thread" :visible.sync="dialogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="Thread Title" :label-width="formLabelWidth">
+          <el-input v-model="form.title" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="First Post" :label-width="formLabelWidth">
+          <el-input v-model="form.firstPost" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addTab">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <el-container>
+      <el-header>
+        <span>Welcome {{ helloText }}</span>
+        <span style="    float: left;        ">
+          <el-button size="small" @click="dialogFormVisible = true">
+            New Thread
+          </el-button>
+        </span>
+        <span style="    float: right;        ">
+          <el-popover placement="top" width="160" v-model="visible">
+            <p>This is a paragraph. Are you sure you want to delete it?</p>
+            <div style="text-align: right; margin: 0">
+              <el-button size="mini" type="text" @click="visible = false">Cancel</el-button>
+              <el-button type="primary" size="mini" @click="deleteThread">Delete</el-button>
+            </div>
+            <el-button slot="reference">Delete</el-button>
+          </el-popover>
+        </span>
+      </el-header>
+      <el-container>
+        <!-- <el-aside width="200px">
+          
+        </el-aside> -->
+        <el-container>
+          <el-main :style="customHeight" class="main-box">
+            <el-tabs v-model="activeName" @tab-click="handleClick" tab-position="left">
+              <el-tab-pane v-for="(item, index) in editableTabs" :key="index" :label="item.thread_title"
+                :name="item.thread_title">
+                <div v-for="(item, index) in posts" :key="'_' + index">
+                  <p>{{item.text}}</p>
+                  <p>- {{item.name}}</p>
+                  <el-divider></el-divider>
+                </div>
+              </el-tab-pane>
+            </el-tabs>
+          </el-main>
+          <el-footer>
+            <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="textarea" @keyup.enter.native="newPost">
+            </el-input>
+          </el-footer>
+        </el-container>
+      </el-container>
+    </el-container>
+  </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- import axios -->
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+  // const axios = require('axios');
+
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        helloText: '',
+        visible: false,
+        activeName: 'second',
+        dialogFormVisible: false,
+        form: {
+          title: '',
+          firstPost: ''
+        },
+        formLabelWidth: '120px',
+        isCollapse: true,
+        textarea: '',
+        editableTabsValue: '2',
+        editableTabs: [{
+          "thread_title": "Does anybody play an instrument?",
+          "icon": "🎸",
+          "user": "norman",
+          "id": 1
+        },
+        {
+          "thread_title": "Hey everybody!",
+          "user": "josa",
+          "icon": "👋",
+          "id": 2
+        }],
+        tabIndex: 2,
+        customHeight: 'height: 500px;',
+        posts: [],
+        threadID: null,
+        threadOwnUser: null,
+        scheduledTasksID: null
+      }
+    },
+    mounted() {
+
+      console.log("宽度", document.documentElement.clientWidth);
+      console.log("高度", document.documentElement.clientHeight);
+      console.log(document.documentElement.clientHeight - 120)
+      this.customHeight = 'height:' + (document.documentElement.clientHeight - 120 - 40) + 'px'
+      this.getAllThreads()
+      this.helloText = this.getUrlKey('name')
+    },
+    methods: {
+      getUrlKey(name) {
+        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+      },
+      getAllThreads() {
+        const _this = this
+        clearInterval(_this.scheduledTasksID)
+        axios.get('http://127.0.0.1:7777/api/threads')
+          .then(function (response) {
+            // 处理成功情况
+            response.data.forEach(item => {
+              _this.editableTabs = response.data
+              console.log(_this.editableTabs)
+            });
+          })
+          .catch(function (error) {
+            // 处理错误情况
+            _this.$message.error(error);
+          });
+      },
+      getAllPosts(id) {
+        const _this = this
+        if (id === null || id === undefined) {
+          id = _this.threadID
+        }
+        if (id === null || id === undefined) {
+          return
+        }
+        axios.get(`http://127.0.0.1:7777/api/threads/${id}/posts`)
+          .then(function (response) {
+            // 处理成功情况
+            _this.posts = response.data
+          })
+          .catch(function (error) {
+            // 处理错误情况
+            _this.$message.error(error);
+          });
+      },
+      addTab(targetName) {
+        if (this.form.title.length <= 0 || this.form.firstPost.length <= 0) {
+          this.$message.error('The submitted data cannot be empty');
+          return
+        }
+        const _this = this
+        axios.post('http://127.0.0.1:7777/api/threads', JSON.stringify({
+          thread_title: _this.form.title,
+          user: _this.getUrlKey('username'),
+          text: _this.form.firstPost,
+          icon: 'A'
+        }), {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        ).then(function (response) {
+          _this.getAllThreads()
+          _this.dialogFormVisible = false
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      },
+      deleteThread() {
+        if (this.threadID === null || this.threadID === undefined || this.threadID === '') {
+          this.$message.error('Please select one Thread');
+          return
+        }
+        const _this = this
+        if (this.threadOwnUser === this.getUrlKey('username')) {
+          axios.delete('http://127.0.0.1:7777/api/threads/' + _this.threadID, {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+              'user': this.getUrlKey('username'),
+            }),
+
+          }).then(res => {
+            _this.getAllThreads()
+          })
+        } else {
+          this.$message.warning("Sorry, you don't have permission")
+        }
+
+      },
+      handleClick(targetName) {
+        clearInterval(this.scheduledTasksID)
+        console.log(targetName.index)
+        this.threadID = this.editableTabs[targetName.index].id
+        this.threadOwnUser = this.editableTabs[targetName.index].user
+        this.getAllPosts(this.threadID)
+
+        this.scheduledTasksID = setInterval(this.getAllPosts, 1000 * 10)
+      },
+      newPost() {
+        if (this.threadID === null || this.threadID === undefined || this.threadID === '') {
+          this.$message.error('Please select one Thread');
+          return
+        }
+        if (this.textarea.length <= 0) {
+          this.$message.warning('Please input message');
+          return
+        }
+        const _this = this
+        console.log('thread id:', _this.threadID)
+
+        axios.post(`http://127.0.0.1:7777/api/threads/${_this.threadID}/posts`, JSON.stringify({
+          user: _this.getUrlKey('username'),
+          text: _this.textarea,
+        }), {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        ).then(function (response) {
+          _this.textarea = ""
+          _this.getAllPosts(_this.threadID)
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      }
+    }
+  })
+</script>
+
+</html>
+<style>
+  .el-header,
+  .el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+  }
+
+  .el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+  }
+
+  .el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    /* text-align: center; */
+    /* line-height: 160px; */
+  }
+
+  body>.el-container {
+    margin-bottom: 40px;
+  }
+
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }
+
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+
+  .main-box {
+    overflow: auto;
+  }
+</style>
