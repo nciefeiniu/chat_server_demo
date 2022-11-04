@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.10/lib/theme-chalk/index.css">
+  <style>
+    .text {
+      font-size: 14px;
+    }
+
+    .item {
+      margin-bottom: 18px;
+    }
+
+    .clearfix:before,
+    .clearfix:after {
+      display: table;
+      content: "";
+    }
+
+    .clearfix:after {
+      clear: both
+    }
+
+    .box-card {
+      width: 480px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <el-dialog title="New Thread" :visible.sync="dialogFormVisible">
+      <el-form>
+        <el-form-item label="title" :label-width="formLabelWidth">
+          <el-input v-model="form.title" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="post" :label-width="formLabelWidth">
+          <el-input v-model="form.post" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="open">Submit</el-button>
+      </div>
+    </el-dialog>
+    <div>
+      <el-card class="box-card" style="margin: 0 auto;">
+        <div slot="header" class="clearfix">
+          <span>Threads:</span>
+          <el-button style="float: right; padding: 3px 0" type="text" @click="dialogFormVisible = true">New Thread
+          </el-button>
+        </div>
+        <div v-for="item in threads" class="text item">
+          <el-link type="primary"
+            :href="'./post.html?username=' + loginUserName + '&origin_username=' + item.user + '&id=' + item.id">
+            {{item.icon }} | {{item.thread_title}}
+          </el-link>
+          <el-button type="text" size="mini" style="float: right;" @click="delThread(item.user, item.id)">Delete
+          </el-button>
+        </div>
+      </el-card>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.0/vue.min.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.10/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+  const apiAddress = "http://127.0.0.1:7777"
+
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        dialogFormVisible: false,
+        visible: false,
+        threads: [],
+        loginUserName: '',
+        formLabelWidth: '120px',
+        form: {
+          title: '',
+          post: ''
+        }
+      }
+    },
+    mounted() {
+      this.downloadAllThreads()
+      this.loginUserName = this.getUrlParameter('username')
+    },
+    computed: {
+
+    },
+    methods: {
+      open() {
+        if (this.form.title.length <= 0) {
+          this.$message.error("Sorry, input error, please input again");
+          return
+        }
+        if (this.form.post.length <= 0) {
+          this.$message.error("Sorry, input error, please input again");
+          return
+        }
+        const that = this
+        $.ajax({
+          type: "post",
+          url: apiAddress + '/api/threads',
+          async: false,
+          data: JSON.stringify({
+            "thread_title": that.form.title,
+            "text": that.form.post,
+            "user": that.loginUserName,
+            "icon": "😊"
+          }),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (data) {
+            that.downloadAllThreads()
+          }
+        })
+        that.dialogFormVisible = false
+
+
+      },
+      delThread(originUser, threadID) {
+        if (originUser !== this.loginUserName) {
+          this.$message.error("Sorry, you can't delete the thread created by others");
+          return;
+        }
+        const that = this
+        $.ajax({
+          url: `http://127.0.0.1:7777/api/threads/${threadID}`,
+          method: 'DELETE',
+          contentType: "application/json",
+          data: JSON.stringify({
+            'user': that.loginUserName,
+          }),
+          success: function (res) {
+            // 成功
+            that.$message.success('Success delete this Thread')
+            that.downloadAllThreads()
+          },
+          error: function (err) {
+            // 失败
+            console.log(err)
+          }
+        })
+
+
+      },
+      downloadAllThreads() {
+        const _this = this
+        $.get(apiAddress + "/api/threads", function (resp) {
+          _this.threads = resp
+          console.log(resp)
+        })
+      },
+      getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+      }
+    }
+  })
+</script>
+
+</html>
