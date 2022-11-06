@@ -1,0 +1,174 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue/dist/tdesign.min.css" />
+  <title>Server Login</title>
+  <style scoped>
+    .t-button {
+      margin-right: 20px;
+    }
+
+    .t-drawer-demo-div {
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+
+<body style="    background-color: blanchedalmond;
+">
+  <div id="app" style="text-align: center;">
+
+    <div>
+      <t-button variant="dashed" theme="primary" @click="handleClick">New Thread</t-button>
+    </div>
+    <t-space style="width: 700px; margin-top: 15%;">
+
+      <t-list :split="true" :stripe="true">
+        <t-list-item v-for="item in threadsData" :key="item.id">
+          <t-list-item-meta :image="imageUrl" :title="item.thread_title" :description="'Create By: ' + item.user">
+          </t-list-item-meta>
+          <template #action>
+            <span>
+              <t-button variant="dashed" theme="success" @click="handleLook(item.id)">Look</t-button>
+              <t-button variant="dashed" theme="danger" @click="handleDelThread(item.id, item.user)">Delete</t-button>
+            </span>
+          </template>
+        </t-list-item>
+      </t-list>
+    </t-space>
+
+    <t-drawer :visible="visible" header="Create a New Thread" placement="top" cancelBtn="Cancel" :closeBtn="true"
+      @close="handleClose" @confirm="handleSubmit" confirmBtn="yes" :footer="false">
+      <div class="t-drawer-demo-div">
+        <span>Thread Title</span>
+        <t-input v-model="formData.title" />
+      </div>
+      <div class="t-drawer-demo-div">
+        <span>First Post</span>
+        <t-input v-model="formData.firstPost" />
+      </div>
+      <div class="t-drawer-demo-div">
+        <span>
+          <t-button variant="dashed" theme="success" @click="handleClose">Cancel</t-button>
+        </span>
+        <span>
+          <t-button variant="dashed" theme="danger" @click="handleSubmit">Create</t-button>
+        </span>
+      </div>
+    </t-drawer>
+  </div>
+
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/@vue/composition-api@1.7.0/dist/vue-composition-api.prod.js"></script>
+  <script src="https://unpkg.com/tdesign-vue/dist/tdesign.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script lang="jsx">
+    const urlParams = new URLSearchParams(window.location.search)
+
+    const NEW_THREAD_DATA = {
+      title: '',
+      firstPost: '',
+    }
+
+    new Vue({
+      el: '#app',
+      data: {
+        formData: { ...NEW_THREAD_DATA },
+        imageUrl: 'https://tdesign.gtimg.com/site/avatar.jpg',
+        threadsData: [],
+        visible: false,
+        username: '',
+        name: '',
+
+      },
+      mounted() {
+        this.getAllThreads();
+        this.username = urlParams.get('username');
+        this.name = urlParams.get('name');
+
+        if (this.username.length <= 0) {
+          this.$message.error("Please Login");
+          window.location.href = './login.html';
+          return
+        }
+      },
+      methods: {
+        setVisible(state) {
+          this.visible = state;
+        },
+        handleClick() {
+          this.setVisible(true);
+        },
+        handleClose() {
+          this.setVisible(false);
+        },
+        handleSubmit() {
+          // 点击提交按钮
+          if (this.formData.title.length <= 0 || this.formData.firstPost.length <= 0) {
+            this.$message.error("Title or first post cannot be empty");
+            return
+          }
+          if (this.username.length <= 0) {
+            this.$message.error("Please Login");
+            window.location.href = './login.html';
+            return
+          }
+
+          this.sendCreateNewThreadApi();
+        },
+        handleDelThread(id, originUser) {
+          if (originUser !== this.username) {
+            this.$message.warning("Warning, you cannot delete someone else's thread");
+            return;
+          }
+          this.sendDeleteThreadApi(id, originUser);
+        },
+        handleLook(id) {
+          window.location.href = './chat.html?id=' + id + '&username=' + this.username;
+        },
+        sendDeleteThreadApi(id, username) {
+          const _this = this;
+          axios.delete('http://127.0.0.1:7777/api/threads/' + id, {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+              'user': username,
+            })
+          }).then(resp => {
+            _this.getAllThreads();
+          });
+        },
+        sendCreateNewThreadApi() {
+          const _this = this
+          axios.post('http://127.0.0.1:7777/api/threads', JSON.stringify({
+            thread_title: _this.formData.title,
+            user: _this.username,
+            text: _this.formData.firstPost,
+            icon: "👋"
+          }), {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+          ).then(function (response) {
+            _this.handleClose();
+            _this.getAllThreads();
+          }).catch(function (error) {
+            _this.$message.error(error);
+          });
+        },
+        getAllThreads() {
+          const _this = this
+          axios.get('http://127.0.0.1:7777/api/threads').then(resp => {
+            _this.threadsData = resp.data;
+          })
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

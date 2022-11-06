@@ -1,0 +1,89 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue/dist/tdesign.min.css" />
+  <title>Server Login</title>
+</head>
+
+<body>
+  <div id="app" style="text-align: center;">
+
+    <t-space style="width: 350px; margin-top: 25%;">
+      <t-form :data="formData" ref="form" @reset="onReset" @submit="onSubmit" :colon="true" :labelWidth="0">
+        <t-form-item name="account" label="username" :rules="[
+        { required: true, message: 'This item is required' },
+      ]">
+          <t-input clearable v-model="formData.account" placeholder="Please enter the account username">
+            <desktop-icon slot="prefix-icon"></desktop-icon>
+          </t-input>
+        </t-form-item>
+        <t-form-item>
+          <t-button theme="primary" type="submit" block>Login</t-button>
+        </t-form-item>
+      </t-form>
+    </t-space>
+  </div>
+
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/@vue/composition-api@1.7.0/dist/vue-composition-api.prod.js"></script>
+  <script src="https://unpkg.com/tdesign-vue/dist/tdesign.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script>
+
+    // Vue.use(TDesign);
+
+    const INITIAL_DATA = {
+      account: '',
+      password: '',
+    };
+
+    new Vue({
+      el: '#app',
+      data: {
+        formData: { ...INITIAL_DATA },
+      },
+      methods: {
+        onReset() {
+          this.$message.success('重置成功');
+        },
+        onSubmit({ validateResult, firstError }) {
+          if (validateResult === true) {
+            this.sendLoginApi();
+            // this.$message.success('提交成功');
+          } else {
+            console.log('Errors: ', validateResult);
+            this.$message.warning(firstError);
+          }
+        },
+        sendLoginApi() {
+          const _this = this
+          axios.get('http://127.0.0.1:7777/api/users')
+            .then(function (response) {
+              // 处理成功情况
+              const data = response.data
+              let userIsRight = false
+              let indexUrl = null
+              for (let i = 0; i < data.length; i++) {
+                if (data[i].username === _this.formData.account) {
+                  userIsRight = true
+                  indexUrl = `./index.html?username=${data[i].username}&name=${data[i].name}`
+                }
+              }
+              if (userIsRight === true) {
+                window.location.href = indexUrl;
+              } else {
+                _this.$message.error('user name does not exist')
+              }
+            })
+            .catch(function (error) { // 请求失败处理
+              console.log(error);
+            });
+        }
+      }
+    })
+  </script>
+
+</body>
+
+</html>

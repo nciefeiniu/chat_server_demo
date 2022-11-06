@@ -1,0 +1,163 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/tdesign-vue/dist/tdesign.min.css" />
+  <title>Server Login</title>
+  <style>
+    .action-text {
+      display: inline-block;
+      margin-left: 6px;
+      line-height: 15px;
+    }
+  </style>
+</head>
+
+<body style="background-color: cornsilk;">
+  <div id="app" style="text-align: center;">
+
+    <t-space style="width: 500px; height: 500px; margin-top: 15%; overflow: auto;" id="chat_box">
+      <div>
+        <t-list :split="true">
+          <t-list-item v-for="(item, index) in commentsData" :key="index">
+            <template #content>
+              <t-comment :avatar="item.avatar" :author="item.name" :content="item.text">
+                <template #actions>
+
+                  <span key="chat">
+                    <icon name="chat" />
+                    <span class="action-text" @click="replayHandle(item.name)">Replay</span>
+                  </span>
+                </template>
+              </t-comment>
+            </template>
+          </t-list-item>
+        </t-list>
+      </div>
+
+    </t-space>
+
+    <div style="width: 720px;bottom: 12px;position: fixed;">
+      <t-comment avatar="https://tdesign.gtimg.com/site/avatar.jpg">
+        <template #content>
+          <div class="form-container">
+            <span>
+              <t-textarea placeholder="请输入内容" v-model="replyData" />
+            </span>
+            <span>
+              <t-button class="form-submit" @click="submitReply">POST</t-button>
+            </span>
+          </div>
+        </template>
+      </t-comment>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/@vue/composition-api@1.7.0/dist/vue-composition-api.prod.js"></script>
+  <script src="https://unpkg.com/tdesign-vue/dist/tdesign.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script>
+
+    const urlParams = new URLSearchParams(window.location.search)
+
+    const INITIAL_DATA = {
+      account: '',
+      password: '',
+    };
+
+    new Vue({
+      el: '#app',
+      data: {
+        commentsData: [
+
+          {
+            "text": "I love to play guitar, anybody else?",
+            "user": "norman",
+            "name": "Norman C. Lowery"
+          },
+          {
+            "text": "Not me.",
+            "user": "amanda",
+            "name": "Amanda Costa Rodrigues"
+          },
+          {
+            "text": "Ok. Thanks for your contribution @amanda",
+            "user": "norman",
+            "name": "Norman C. Lowery"
+          },
+          {
+            "text": "I play the air drums!",
+            "user": "owen",
+            "name": "Owen Dow"
+          }
+        ],
+        replyData: '',
+      },
+      mounted() {
+        this.getAllPosts();
+        setInterval(this.getAllPosts, 1000 * 10);
+      },
+      methods: {
+        replayHandle(name) {
+          this.replyData = '@' + name
+        },
+        submitReply() {
+          // POST 按钮
+          console.log('reply');
+          this.sendNewPostApi();
+        },
+        onReset() {
+          this.$message.success('success Reset');
+        },
+        onSubmit({ validateResult, firstError }) {
+          if (validateResult === true) {
+            this.sendLoginApi();
+            // this.$message.success('提交成功');
+          } else {
+            console.log('Errors: ', validateResult);
+            this.$message.warning(firstError);
+          }
+        },
+        sendNewPostApi() {
+          const _this = this
+          axios.post('http://127.0.0.1:7777/api/threads/' + urlParams.get('id') + '/posts', JSON.stringify({
+            user: urlParams.get('username'),
+            text: _this.replyData,
+          }), {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+          ).then(function (response) {
+            _this.replyData = "";
+            _this.getAllPosts()
+          }).catch(function (error) {
+            console.log(error);
+          });
+
+        },
+        getAllPosts() {
+          const _this = this
+          const ID = urlParams.get('id')
+          axios.get('http://127.0.0.1:7777/api/threads/' + ID + '/posts')
+            .then(function (response) {
+              // 处理成功情况
+              const data = response.data;
+              _this.commentsData = data;
+            })
+            .catch(function (error) { // 请求失败处理
+              console.log(error);
+            });
+        }
+      },
+      updated() {
+        let box = document.getElementById('chat_box');
+        box.scrollTop = box.scrollHeight;
+      }
+    })
+  </script>
+
+</body>
+
+</html>
