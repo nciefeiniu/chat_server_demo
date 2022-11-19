@@ -21,20 +21,54 @@
       </div>
       <div class="col" style="text-align: right;">
         <span>
-          <button type="button" class="btn btn-link" onclick="myPoetry()">My Poetry</button>
+          <button type="button" class="btn btn-link" onclick="myPoetry(1)">My Poetry</button>
         </span>
         <span>
-          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a poem</button>
+          <button type="button" class="btn btn-link" onclick="myPoetry(2)">My favorite poems</button>
+        </span>
+        <span>
+          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a
+            poem</button>
         </span>
       </div>
     </div>
   </a>
   <div style="width: 700px; height: 100vh; margin: 10px auto;">
+    <h3 id="message-title"></h3>
     <ol class="list-group list-group-numbered" id="all-poerty">
 
 
     </ol>
   </div>
+
+  <!-- 添加诗歌 -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">New Poems</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Title:</label>
+              <input type="text" class="form-control" id="recipient-name">
+            </div>
+            <div class="mb-3">
+              <label for="message-text" class="col-form-label">Content:</label>
+              <textarea class="form-control" id="message-text" rows="5"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="sendPoems()">Publish Poem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="./js/jquery.js"></script>
   <script src="./js/bootstrap.js"></script>
   <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
@@ -58,11 +92,30 @@
   </script>
   <script>
     var isLogin = false
+    var exampleModal = document.getElementById('exampleModal')
+    var userId = null
+    var token = null
+    var showOnlyMySelf = false
+    var showILiked = false
 
     $(function () {
-      var token = getUrlParameter('token')
+      token = getUrlParameter('token')
       var userName = getUrlParameter('username')
-      var userId = getUrlParameter('user_id')
+      userId = getUrlParameter('user_id')
+
+      const messageBox = document.getElementById('message-title')
+      messageBox.innerText = 'All poems: '
+
+      if (getUrlParameter('show_my_self')) {
+        showOnlyMySelf = true
+        messageBox.innerText = `${userName}'s poems: `
+      }
+      if (getUrlParameter('show_my_like')) {
+        showILiked = true
+        messageBox.innerText = `${userName}'s favorite poems: `
+      }
+
+
       if (!token || !userName || !userId) {
         // window.location.replace('./login.html')
         document.getElementById('username-box').innerText = `Welcome tourist`
@@ -108,20 +161,59 @@
     }
 
     function getAllPoetry() {
-      get('/api/poems', getSuccessHandle)
+      let url = '/api/poems'
+      if (showOnlyMySelf) {
+        url = '/api/mypoem/' + userId
+      }
+      if (showILiked) {
+        url = '/api/favoritepoem/' + userId
+      }
+      get(url, getSuccessHandle, false, false, token)
     }
 
-    function myPoetry() {
+    function myPoetry(typ) {
       if (isLogin === false) {
         return
       }
+      let tt = 'show_my_self'
+      if (typ === 2) {
+        tt = 'show_my_like'
+      }
+      window.location.replace(`./index.html${getAllUrlParameterStr()}&${tt}=true`)
     }
+
+    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+      keyboard: false
+    })
 
     function publishPoem() {
       if (isLogin === false) {
         return
       }
+
+      myModal.show()
     }
+
+    function sendPoems() {
+      const content = document.getElementById('message-text').value
+      const title = document.getElementById('recipient-name').value
+      if (title === '' || title === undefined || title === null) {
+        alert('The title cannot be empty')
+        return
+      }
+      if (content === '' || content === undefined || content === null) {
+        alert('The content cannot be empty')
+        return
+      }
+      post('/api/poem', JSON.stringify({ member_id: userId, title: title, body: content }), sendSuccessHandle, false, false, token)
+    }
+
+    function sendSuccessHandle(data) {
+
+      myModal.hide()
+      getAllPoetry()
+    }
+
   </script>
 </body>
 
