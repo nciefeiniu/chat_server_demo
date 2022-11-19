@@ -179,7 +179,31 @@
       if (typ === 2) {
         tt = 'show_my_like'
       }
-      window.location.replace(`./index.html${getAllUrlParameterStr()}&${tt}=true`)
+
+      let currentParams = getAllUrlParameterStr()
+      console.log(getUrlParameter('show_my_like'))
+      if (tt === 'show_my_self') {
+        if (getUrlParameter('show_my_like') === 'true') {
+          console.log('ttttt')
+          currentParams = currentParams.replace(/&show_my_like=true/g, "")
+        }
+        if (getUrlParameter('show_my_self') === 'true') {
+          window.location.replace(`./index.html${currentParams}`)
+        } else {
+          window.location.replace(`./index.html${currentParams}&${tt}=true`)
+        }
+      }
+      if (tt === 'show_my_like') {
+        if (getUrlParameter('show_my_self') === 'true') {
+          currentParams = currentParams.replace(/&show_my_self=true/g, "")
+        }
+        if (getUrlParameter('show_my_like') === 'true') {
+          window.location.replace(`./index.html${currentParams}`)
+        } else {
+          window.location.replace(`./index.html${currentParams}&${tt}=true`)
+        }
+      }
+
     }
 
     var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
