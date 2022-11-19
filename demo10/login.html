@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录页面</title>
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <script src="./js/bootstrap.js"></script>
+  <script src="./js/jquery.js"></script>
+  <link rel="stylesheet" href="./css/bootstrap-icons.css">
+</head>
+
+<body>
+  <div class="container-fluid vh-100" style="margin-top:50px">
+    <div class="" style="margin-top:50px">
+      <div class="rounded d-flex justify-content-center">
+        <div class=" col-md-4 col-sm-12 shadow-lg p-5 bg-light">
+          <div class="text-center">
+            <h3 class="text-primary">登录</h3>
+          </div>
+          <div class="p-4">
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-secondary"><i class="bi bi-phone text-white"></i></span>
+              <input type="text" class="form-control" placeholder="手机号" id="usernameInput">
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-secondary"><i class="bi bi-person-fill text-white"></i></span>
+              <input type="password" class="form-control" placeholder="密码" id="passwordInput">
+            </div>
+            <div class="col-12">
+              <a href="./register.html" class="link-primary">注 册</a>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary px-4 float-end mt-4" onclick="loginHandle()">登 录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/login.js">
+
+  </script>
+</body>
+
+</html>
