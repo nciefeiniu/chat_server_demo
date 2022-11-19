@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://layui.itze.cn/layui-v2.6.8/layui/css/layui.css">
+</head>
+
+<body>
+  <div class="container-fluid vh-100" style="margin-top:50px">
+    <div class="" style="margin-top:50px">
+      <div class="rounded d-flex justify-content-center">
+        <div class=" col-md-4 col-sm-12 shadow-lg p-5 bg-light">
+          <div class="text-center">
+            <h3 class="text-primary">Login</h3>
+          </div>
+          <div class="p-4">
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-secondary"><i class="bi bi-phone text-white"></i></span>
+              <input type="text" class="form-control" placeholder="username" id="usernameInput">
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-secondary"><i class="bi bi-person-fill text-white"></i></span>
+              <input type="password" class="form-control" placeholder="password" id="passwordInput">
+            </div>
+            <div class="col-12">
+              <a href="./register.html" class="link-primary">Register</a>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary px-4 float-end mt-4" onclick="loginHandle()">Login</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/jquery.js"></script>
+  <script src="./js/bootstrap.js"></script>
+  <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
+  <script src="./js/ajax.js"></script>
+  <script src="./js/login.js"></script>
+</body>
+
+</html>

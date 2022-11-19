@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poetries</title>
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://layui.itze.cn/layui-v2.6.8/layui/css/layui.css">
+</head>
+
+<body>
+  <a name="start" id="start-marl">
+    <div class="row">
+      <div class="col">
+        <h3 id="username-box">Welcome</h3>
+      </div>
+      <div class="col">
+      </div>
+      <div class="col" style="text-align: right;">
+        <span>
+          <button type="button" class="btn btn-link" onclick="myPoetry()">My Poetry</button>
+        </span>
+        <span>
+          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a poem</button>
+        </span>
+      </div>
+    </div>
+  </a>
+  <div style="width: 700px; height: 100vh; margin: 10px auto;">
+    <ol class="list-group list-group-numbered" id="all-poerty">
+
+
+    </ol>
+  </div>
+  <script src="./js/jquery.js"></script>
+  <script src="./js/bootstrap.js"></script>
+  <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
+  <script src="./js/ajax.js"></script>
+  <script>
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    function getAllUrlParameterStr() {
+      let paramsStr = location.search;
+      if (paramsStr !== undefined && paramsStr !== null && paramsStr !== '') {
+        return paramsStr
+      } else {
+        return '?1=1'
+      }
+    }
+  </script>
+  <script>
+    var isLogin = false
+
+    $(function () {
+      var token = getUrlParameter('token')
+      var userName = getUrlParameter('username')
+      var userId = getUrlParameter('user_id')
+      if (!token || !userName || !userId) {
+        // window.location.replace('./login.html')
+        document.getElementById('username-box').innerText = `Welcome tourist`
+      } else {
+        document.getElementById('username-box').innerText = `Welcome  ${userName}`
+        isLogin = true
+      }
+
+
+      getAllPoetry()
+    });
+
+    function getSuccessHandle(data) {
+      console.log(data)
+      const datas = data.data
+      if (!datas) {
+        return
+      }
+      const olNode = document.getElementById('all-poerty')
+      olNode.innerText = ''
+
+      datas.forEach(element => {
+        const liNode = document.createElement('li')
+        liNode.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-start')
+        if (isLogin === true) {
+          liNode.innerHTML = `<div class="ms-2 me-auto">
+            <div class="fw-bold"><a href="./poetry.html${getAllUrlParameterStr()}&id=${element.id}" class="link-dark">${element.title}</a></div>
+             ${element.body}
+           </div>
+           <span class="badge bg-primary rounded-pill">Score: ${element.final_score}</span>`
+        } else {
+          // 如果没有登录，就不能跳转
+          liNode.innerHTML = `<div class="ms-2 me-auto">
+            <div class="fw-bold"><a href="#" class="link-dark">${element.title}</a></div>
+             ${element.body}
+           </div>
+           <span class="badge bg-primary rounded-pill">Score: ${element.final_score}</span>`
+        }
+
+        olNode.appendChild(liNode)
+      });
+
+    }
+
+    function getAllPoetry() {
+      get('/api/poems', getSuccessHandle)
+    }
+
+    function myPoetry() {
+      if (isLogin === false) {
+        return
+      }
+    }
+
+    function publishPoem() {
+      if (isLogin === false) {
+        return
+      }
+    }
+  </script>
+</body>
+
+</html>

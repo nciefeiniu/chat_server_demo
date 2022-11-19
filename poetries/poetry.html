@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poetries</title>
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://layui.itze.cn/layui-v2.6.8/layui/css/layui.css">
+  <link rel="stylesheet" href="./css/star-rating.min.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <style>
+    .poem-xx {
+      text-align: center;
+      font-size: 25px;
+    }
+  </style>
+</head>
+
+<body>
+  <a name="start" id="start-marl">
+    <div class="row">
+      <div class="col">
+        <h3 id="username-box">Welcome</h3>
+      </div>
+      <div class="col">
+      </div>
+      <div class="col" style="text-align: right;">
+        <span>
+          <button type="button" class="btn btn-link" onclick="myPoetry()">My Poetry</button>
+        </span>
+        <span>
+          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a poem</button>
+        </span>
+      </div>
+    </div>
+  </a>
+  <div style="width: 700px; height: 100vh; margin: 10px auto;">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title poem-xx" id="poem-title"></h5>
+        <h6 class="card-subtitle mb-2 text-muted poem-xx" id="poem-author"></h6>
+        <p class="card-text poem-xx" id="poem-content"></p>
+
+        <p>
+          <input id="input-1" name="input-1" data-show-clear="false" data-show-caption="true" hoverEnabled="false"
+            class="rating rating-loading" data-min="1" data-max="5" data-step="1">
+        </p>
+
+        <a href="#" class="card-link">Another link</a>
+      </div>
+    </div>
+    <p style="margin: 20px 0;">Comments: </p>
+    <div>
+      <ul class="list-group" id="comment-list">
+      </ul>
+    </div>
+
+    <div style="position: fixed; bottom: 1px;">
+      <div class="row">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Please enter a comment" id="comment-input"
+            aria-label="Please enter a comment" aria-describedby="button-addon2" style="width: 600px;">
+          <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+            onclick="submitComment()">Submit</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="./js/jquery.js"></script>
+  <script src="./js/bootstrap.js"></script>
+  <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
+  <script src="./js/ajax.js"></script>
+  <script src="./js/star-rating.min.js"></script>
+  <script src="./js/theme.js"></script>
+
+  <script>
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+  </script>
+  <script>
+    // data-readonly="true"
+    var isLogin = false
+    var loginToken = null
+    var poemID = null
+    var authorID = null
+    var authorName = null
+    var currentUserId = null
+    var canHiddenComment = false
+
+    $(function () {
+      var token = getUrlParameter('token')
+      loginToken = token
+      var userName = getUrlParameter('username')
+      var userId = getUrlParameter('user_id')
+      if (!token || !userName || !userId) {
+        // window.location.replace('./login.html')
+        document.getElementById('username-box').innerText = `Welcome tourist`
+      } else {
+        document.getElementById('username-box').innerText = `Welcome  ${userName}`
+        isLogin = true
+      }
+      currentUserId = userId
+
+      getOnePoem()
+    });
+
+    function getSuccessHandle(data) {
+      const res = data.res
+      document.getElementById('poem-title').innerText = res.title  // 显示诗歌
+      document.getElementById('poem-author').innerText = res.author_name // 显示诗歌
+      document.getElementById('poem-content').innerText = res.body // 显示诗歌
+      poemID = res.id
+      authorID = res.author_id
+      authorName = res.author_name
+
+      if (res.final_score === null || res.final_score === undefined) {
+
+      } else {
+        console.log('得分', res.final_score)
+        const scode = res.final_score + 3
+        const scoreVal = document.getElementById('input-1')
+        scoreVal.value = scode
+        scoreVal.setAttribute('data-readonly', 'true')
+        // $("#input-1").rating({ 'data-readonly': true, 'value': scode });
+
+      }
+
+      if (currentUserId === authorID) {
+        canHiddenComment = true
+      }
+
+      const replys = res.replys
+      if (replys) {  // 显示评论
+        const ulNode = document.getElementById('comment-list')
+        ulNode.innerText = ''
+        replys.forEach(element => {
+          const liNode = document.createElement('li')
+          liNode.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center')
+          if (canHiddenComment) {
+            liNode.innerHTML = `${element.content}<span class="badge bg-secondary rounded-pill">${element.member_name}</span><span class="badge bg-secondary rounded-pill">Hidden</span>`
+          } else {
+            liNode.innerHTML = `${element.content}<span class="badge bg-secondary rounded-pill">${element.member_name}</span>`
+          }
+          ulNode.appendChild(liNode)
+        });
+      }
+    }
+
+    function getOnePoem() {
+      console.log(loginToken)
+      get('/api/poem/' + getUrlParameter('id'), getSuccessHandle, false, false, loginToken)
+    }
+
+    function submitSuccessHandle(data) {
+      getOnePoem()
+    }
+
+    function submitComment() {
+      const inputVal = document.getElementById('comment-input').value
+      if (inputVal === '' || inputVal === undefined || inputVal === null) {
+        alert('Please enter a comment')
+        return
+      }
+      post('/api/reply', JSON.stringify({ member_id: currentUserId, poem_id: poemID, content: inputVal }), submitSuccessHandle, false, false, getUrlParameter('token'))
+    }
+
+  </script>
+</body>
+
+</html>
