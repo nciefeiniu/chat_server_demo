@@ -1,0 +1,25 @@
+body {
+    background-image: url('../images/china.jpeg');
+}
+
+.all-box {
+    margin: 0 auto;
+    width: 1000px;
+    height: 565px;
+}
+
+#carousel-example-generic {
+    width: 1000px;
+    height: 588px;
+}
+
+.header-text {
+    font-size: 40px;
+    background-color: white;
+    margin-bottom: 10px;
+}
+
+.devp-group {
+    position: fixed;
+    top: 10%;
+}

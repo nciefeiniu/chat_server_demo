@@ -1,0 +1,13 @@
+.container {
+    margin-top: 15%;
+    margin-left: 25%;
+}
+
+.name {
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    font-family: 宋体;
+    font-weight: bold;
+    font-size: 33px;
+}

@@ -1,0 +1,180 @@
+<html>
+
+<head>
+    <title></title>
+    <link rel="stylesheet" href="./css/bootstrap.css">
+
+    <link rel="stylesheet" href="./css/index.css">
+    </style>
+</head>
+
+<body>
+    <div class="row" style="background-color: white;">
+        <div class="header-text  col-md-8">中国航空业发展史 <small>从无到有，从弱到强</small></div>
+        <div class="col-md-4">
+            <p class="navbar-text"><a href="./jian_20.html?name=xxx" class="navbar-link">歼-20</a></p>
+            <p class="navbar-text"><a href="./first_fly.html?name=xxx" class="navbar-link">初教-5</a></p>
+
+        </div>
+    </div>
+    <div class="devp-group">
+        <ul class="list-group" id="devp-list">
+        </ul>
+    </div>
+    <div class="all-box">
+        <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+            <!-- Indicators -->
+            <ol class="carousel-indicators" id="carousel-button">
+            </ol>
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner" id="carousel-inner-box" role="listbox">
+            </div>
+            <!-- Controls -->
+            <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+    <div class="all-box">
+        <div class="row">
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/jian8.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>歼-8</h3>
+                        <p>1969年中国研制第二代战斗机</p>
+                        <p><span id="goodSpan" onclick="sendGood(0)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/jian10.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>歼-10</h3>
+                        <p>20世纪90年代中国研制第三代战斗机</p>
+                        <p><span id="goodSpan" onclick="sendGood(1)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/jian11.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>歼-11</h3>
+                        <p>中国第三代战斗机之一</p>
+                        <p><span id="goodSpan" onclick="sendGood(2)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/jian-20.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>歼-20</h3>
+                        <p>2018年中国列装的第五代隐形战斗机</p>
+                        <p><span id="goodSpan" onclick="sendGood(3)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/yun-20.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>运-20</h3>
+                        <p>中国研究制造的新一代军用大型运输机</p>
+                        <p><span id="goodSpan" onclick="sendGood(4)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/arj.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>ARJ21</h3>
+                        <p>中国商飞研制的中短程涡扇支线客机</p>
+                        <p><span id="goodSpan" onclick="sendGood(5)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/c919.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>C919</h3>
+                        <p>国产大型客机 </p>
+                        <p><span id="goodSpan" onclick="sendGood(6)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/c929.webp" alt="...">
+                    <div class="caption">
+                        <h3>C929</h3>
+                        <p>国产远程宽体客机 </p>
+                        <p><span id="goodSpan" onclick="sendGood(7)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="./images/other.jpeg" alt="...">
+                    <div class="caption">
+                        <h3>未完待续</h3>
+                        <p>国之重器 </p>
+                        <p><span id="goodSpan" onclick="sendGood(8)">
+                                <img src="./images/good.jpg" style="width: 25px; height: 25px;" />
+                            </span> [
+                            <span class="good"></span>]
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/jquery.js"></script>
+
+    <script src="./js/bootstrap.js"></script>
+    <script src="./js/index.js"></script>
+    <script src="./js/lihua.js"></script>
+</body>
+
+</html>
