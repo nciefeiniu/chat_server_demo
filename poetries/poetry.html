@@ -53,7 +53,31 @@
 
         <p style="margin-top: 50px;">
           <label for="customRange1" class="form-label">Score:</label>
-          <input type="range" class="form-range" min="-2" max="2" id="customRange2" onchange="scoreChange()">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"
+            onchange="scoreChange(1)">
+          <label class="form-check-label" for="inlineRadio1">-2</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"
+            onchange="scoreChange(2)">
+          <label class="form-check-label" for="inlineRadio2">-1</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"
+            onchange="scoreChange(3)">
+          <label class="form-check-label" for="inlineRadio3">0</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value="option4"
+            onchange="scoreChange(4)">
+          <label class="form-check-label" for="inlineRadio3">1</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" value="option5"
+            onchange="scoreChange(5)">
+          <label class="form-check-label" for="inlineRadio3">2</label>
+        </div>
         </p>
 
       </div>
@@ -142,11 +166,14 @@
         console.log('得分', res.final_score)
         const scode = res.final_score
         const scoreVal = document.getElementById('customRange2')
-        scoreVal.value = scode
+        // scoreVal.value = scode
         if (scode === 0) {
 
         } else {
-          scoreVal.setAttribute('disabled', 'true')
+          document.getElementById(`inlineRadio${scode + 3}`).setAttribute('checked', 'true')
+          for (let i = 1; i < 6; i++) {
+            document.getElementById(`inlineRadio${i}`).setAttribute('disabled', 'true')
+          }
         }
         // $("#input-1").rating({ 'data-readonly': true, 'value': scode });
 
@@ -208,11 +235,10 @@
       getOnePoem()
     }
 
-    function scoreChange() {
+    function scoreChange(val) {
       // 打分
-      const score = document.getElementById('customRange2').value
-
-      post('/api/score', JSON.stringify({ member_id: parseInt(currentUserId), poem_id: parseInt(poemID), score: parseInt(score) }), scoreSuccessHandle, false, false, loginToken) // 发送Ajax请求
+      const score = val
+      post('/api/score', JSON.stringify({ member_id: parseInt(currentUserId), poem_id: parseInt(poemID), score: parseInt(score - 3) }), scoreSuccessHandle, false, false, loginToken) // 发送Ajax请求
     }
 
 
