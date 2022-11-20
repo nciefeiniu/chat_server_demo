@@ -74,14 +74,14 @@
   <script src="https://layui.itze.cn/layui-v2.6.8/layui/layui.js"></script>
   <script src="./js/ajax.js"></script>
   <script>
-    function getUrlParameter(name) {
+    function getUrlParameter(name) {  // 获取URL中的参数的方法
       name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
       var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
       var results = regex.exec(location.search);
       return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     }
 
-    function getAllUrlParameterStr() {
+    function getAllUrlParameterStr() {  // 获取URL中所有参数的方法，返回的是字符串
       let paramsStr = location.search;
       if (paramsStr !== undefined && paramsStr !== null && paramsStr !== '') {
         return paramsStr
@@ -98,7 +98,7 @@
     var showOnlyMySelf = false
     var showILiked = false
 
-    $(function () {
+    $(function () {  // 页面加载完成调用的方法
       token = getUrlParameter('token')
       var userName = getUrlParameter('username')
       userId = getUrlParameter('user_id')
@@ -106,11 +106,11 @@
       const messageBox = document.getElementById('message-title')
       messageBox.innerText = 'All poems: '
 
-      if (getUrlParameter('show_my_self')) {
+      if (getUrlParameter('show_my_self')) {  // 判断是否是显示 会员发布的诗歌
         showOnlyMySelf = true
         messageBox.innerText = `${userName}'s poems: `
       }
-      if (getUrlParameter('show_my_like')) {
+      if (getUrlParameter('show_my_like')) { // 判断是否显示 会员 喜欢的诗歌
         showILiked = true
         messageBox.innerText = `${userName}'s favorite poems: `
       }
@@ -121,24 +121,24 @@
         document.getElementById('username-box').innerText = `Welcome tourist`
       } else {
         document.getElementById('username-box').innerText = `Welcome  ${userName}`
-        isLogin = true
+        isLogin = true  // 判断是否登录了
       }
 
 
-      getAllPoetry()
+      getAllPoetry()  // 获取所有的诗歌
     });
 
-    function getSuccessHandle(data) {
+    function getSuccessHandle(data) {  // 成功获取到所有诗歌的方法，渲染到页面上去
       console.log(data)
       const datas = data.data
       if (!datas) {
         return
       }
-      const olNode = document.getElementById('all-poerty')
+      const olNode = document.getElementById('all-poerty')  // 准备渲染
       olNode.innerText = ''
 
       datas.forEach(element => {
-        const liNode = document.createElement('li')
+        const liNode = document.createElement('li')  // 创建dom对象
         liNode.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-start')
         if (isLogin === true) {
           liNode.innerHTML = `<div class="ms-2 me-auto">
@@ -155,23 +155,23 @@
            <span class="badge bg-primary rounded-pill">Score: ${element.final_score}</span>`
         }
 
-        olNode.appendChild(liNode)
+        olNode.appendChild(liNode)  // 添加到这个节点上
       });
 
     }
 
-    function getAllPoetry() {
+    function getAllPoetry() {  // 获取所有诗歌
       let url = '/api/poems'
-      if (showOnlyMySelf) {
+      if (showOnlyMySelf) {  // 这是获取会员发布的诗歌
         url = '/api/mypoem/' + userId
       }
-      if (showILiked) {
+      if (showILiked) {  // 这是获取会员喜欢的诗歌
         url = '/api/favoritepoem/' + userId
       }
-      get(url, getSuccessHandle, false, false, token)
+      get(url, getSuccessHandle, false, false, token)  // 发送ajax请求
     }
 
-    function myPoetry(typ) {
+    function myPoetry(typ) {  // 点击My Poetry 按钮执行的函数
       if (isLogin === false) {
         return
       }
@@ -210,7 +210,7 @@
       keyboard: false
     })
 
-    function publishPoem() {
+    function publishPoem() {  // 点击 Publish Poem执行的函数
       if (isLogin === false) {
         return
       }
@@ -218,7 +218,7 @@
       myModal.show()
     }
 
-    function sendPoems() {
+    function sendPoems() {  // 点击 Publish Poem执行的函数
       const content = document.getElementById('message-text').value
       const title = document.getElementById('recipient-name').value
       if (title === '' || title === undefined || title === null) {
@@ -229,13 +229,13 @@
         alert('The content cannot be empty')
         return
       }
-      post('/api/poem', JSON.stringify({ member_id: userId, title: title, body: content }), sendSuccessHandle, false, false, token)
+      post('/api/poem', JSON.stringify({ member_id: userId, title: title, body: content }), sendSuccessHandle, false, false, token)  // 发送ajax请求
     }
 
-    function sendSuccessHandle(data) {
+    function sendSuccessHandle(data) {  // 发布诗歌成功调用的函数
 
-      myModal.hide()
-      getAllPoetry()
+      myModal.hide()  // 隐藏弹出框
+      getAllPoetry()  // 再次执行获取所有诗歌操作
     }
 
   </script>

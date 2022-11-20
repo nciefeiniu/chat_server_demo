@@ -34,10 +34,10 @@
         <span>
           <button type="button" class="btn btn-link" onclick="myPoetry(2)">My favorite poems</button>
         </span>
-        <span>
+        <!-- <span>
           <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a
             poem</button>
-        </span>
+        </span> -->
       </div>
     </div>
   </a>
@@ -107,7 +107,7 @@
     var currentUserId = null
     var canHiddenComment = false
 
-    $(function () {
+    $(function () {  // 页面加载完成，执行下面这些
       var token = getUrlParameter('token')
       loginToken = token
       var userName = getUrlParameter('username')
@@ -121,10 +121,10 @@
       }
       currentUserId = userId
 
-      getOnePoem()
+      getOnePoem()  // 获取这首诗歌
     });
 
-    function getSuccessHandle(data) {
+    function getSuccessHandle(data) {  // 获取成功执行的函数，渲染页面
       const res = data.res
       document.getElementById('poem-title').innerText = res.title  // 显示诗歌
       document.getElementById('poem-author').innerText = res.author_name // 显示诗歌
@@ -173,9 +173,9 @@
       }
     }
 
-    function getOnePoem() {
+    function getOnePoem() {  // 获取
       console.log(loginToken)
-      get('/api/poem/' + getUrlParameter('id'), getSuccessHandle, false, false, loginToken)
+      get('/api/poem/' + getUrlParameter('id'), getSuccessHandle, false, false, loginToken)  // 发送请求，Get方法
     }
 
     function hiddenCommentSuccessHandle(data) {
@@ -185,20 +185,20 @@
 
     function hiddenComment(id) {  // 隐藏评论按钮
       console.log('准备隐藏：', id)
-      put('/api/reply', JSON.stringify({ member_id: getUrlParameter('user_id'), poem_id: poemID, reply_id: id }), hiddenCommentSuccessHandle, false, false, loginToken)
+      put('/api/reply', JSON.stringify({ member_id: getUrlParameter('user_id'), poem_id: poemID, reply_id: id }), hiddenCommentSuccessHandle, false, false, loginToken)  // 发送ajax请求，PUT方法
     }
 
     function submitSuccessHandle(data) {
       getOnePoem()
     }
 
-    function submitComment() {
+    function submitComment() {  // 提交评论按钮执行的额函数
       const inputVal = document.getElementById('comment-input').value
       if (inputVal === '' || inputVal === undefined || inputVal === null) {
         alert('Please enter a comment')
         return
       }
-      post('/api/reply', JSON.stringify({ member_id: currentUserId, poem_id: poemID, content: inputVal }), submitSuccessHandle, false, false, getUrlParameter('token'))
+      post('/api/reply', JSON.stringify({ member_id: currentUserId, poem_id: poemID, content: inputVal }), submitSuccessHandle, false, false, getUrlParameter('token'))  // 发送请求
     }
 
     function scoreSuccessHandle(data) {
@@ -209,11 +209,11 @@
       // 打分
       const score = document.getElementById('customRange2').value
 
-      post('/api/score', JSON.stringify({ member_id: parseInt(currentUserId), poem_id: parseInt(poemID), score: parseInt(score) }), scoreSuccessHandle, false, false, loginToken)
+      post('/api/score', JSON.stringify({ member_id: parseInt(currentUserId), poem_id: parseInt(poemID), score: parseInt(score) }), scoreSuccessHandle, false, false, loginToken) // 发送Ajax请求
     }
 
 
-    function myPoetry(typ) {
+    function myPoetry(typ) {  // 点击myPoetry和 My Favorite 按钮
       if (isLogin === false) {
         return
       }

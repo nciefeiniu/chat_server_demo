@@ -1,6 +1,6 @@
 let userName = '';
 
-function loginSuccess(data) {
+function loginSuccess(data) { // 登录成功调用的函数
   if (data.msg === 'Login seccess') {
     const token = data.data.token
     const id = data.data.member_id
@@ -16,7 +16,7 @@ function loginSuccess(data) {
   }
 }
 
-function registerSuccess(data) {
+function registerSuccess(data) { // 注册成功调用的函数
   if (data.meg === 'Login seccess') {
     const token = data.data.token
     const id = data.data.member_id
