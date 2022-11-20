@@ -118,7 +118,7 @@
 
       if (!token || !userName || !userId) {
         // window.location.replace('./login.html')
-        document.getElementById('username-box').innerText = `Welcome tourist`
+        document.getElementById('username-box').innerHTML = `Welcome tourist<a href="./login.html" class="link-info" style="font-size: 14px; margin-left: 10px;">Click here to log in</a>`
       } else {
         document.getElementById('username-box').innerText = `Welcome  ${userName}`
         isLogin = true  // 判断是否登录了
@@ -173,6 +173,7 @@
 
     function myPoetry(typ) {  // 点击My Poetry 按钮执行的函数
       if (isLogin === false) {
+        alert('Please Login')
         return
       }
       let tt = 'show_my_self'
@@ -212,6 +213,7 @@
 
     function publishPoem() {  // 点击 Publish Poem执行的函数
       if (isLogin === false) {
+        alert('Please Login')
         return
       }
 
