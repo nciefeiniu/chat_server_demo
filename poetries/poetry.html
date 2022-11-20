@@ -209,7 +209,7 @@
       // 打分
       const score = document.getElementById('customRange2').value
 
-      post('/api/score', JSON.stringify({ member_id: currentUserId, poem_id: poemID, score: score }), scoreSuccessHandle, false, false, loginToken)
+      post('/api/score', JSON.stringify({ member_id: parseInt(currentUserId), poem_id: parseInt(poemID), score: parseInt(score) }), scoreSuccessHandle, false, false, loginToken)
     }
 
 
