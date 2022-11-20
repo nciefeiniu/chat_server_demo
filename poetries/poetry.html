@@ -29,10 +29,14 @@
       </div>
       <div class="col" style="text-align: right;">
         <span>
-          <button type="button" class="btn btn-link" onclick="myPoetry()">My Poetry</button>
+          <button type="button" class="btn btn-link" onclick="myPoetry(1)">My Poetry</button>
         </span>
         <span>
-          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a poem</button>
+          <button type="button" class="btn btn-link" onclick="myPoetry(2)">My favorite poems</button>
+        </span>
+        <span>
+          <button type="button" class="btn btn-link" onclick="publishPoem()">Publish a
+            poem</button>
         </span>
       </div>
     </div>
@@ -44,12 +48,11 @@
         <h6 class="card-subtitle mb-2 text-muted poem-xx" id="poem-author"></h6>
         <p class="card-text poem-xx" id="poem-content"></p>
 
-        <p>
-          <input id="input-1" name="input-1" data-show-clear="false" data-show-caption="true" hoverEnabled="false"
-            class="rating rating-loading" data-min="1" data-max="5" data-step="1">
+        <p style="margin-top: 50px;">
+          <label for="customRange1" class="form-label">Score:</label>
+          <input type="range" class="form-range" min="-2" max="2" id="customRange2" onchange="scoreChange()">
         </p>
 
-        <a href="#" class="card-link">Another link</a>
       </div>
     </div>
     <p style="margin: 20px 0;">Comments: </p>
@@ -83,6 +86,15 @@
       var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
       var results = regex.exec(location.search);
       return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    function getAllUrlParameterStr() {
+      let paramsStr = location.search;
+      if (paramsStr !== undefined && paramsStr !== null && paramsStr !== '') {
+        return paramsStr
+      } else {
+        return '?1=1'
+      }
     }
   </script>
   <script>
@@ -125,15 +137,19 @@
 
       } else {
         console.log('得分', res.final_score)
-        const scode = res.final_score + 3
-        const scoreVal = document.getElementById('input-1')
+        const scode = res.final_score
+        const scoreVal = document.getElementById('customRange2')
         scoreVal.value = scode
-        scoreVal.setAttribute('data-readonly', 'true')
+        if (scode === 0) {
+
+        } else {
+          scoreVal.setAttribute('disabled', 'true')
+        }
         // $("#input-1").rating({ 'data-readonly': true, 'value': scode });
 
       }
 
-      if (currentUserId === authorID) {
+      if (String(currentUserId) === String(authorID)) {
         canHiddenComment = true
       }
 
@@ -145,9 +161,12 @@
           const liNode = document.createElement('li')
           liNode.setAttribute('class', 'list-group-item d-flex justify-content-between align-items-center')
           if (canHiddenComment) {
-            liNode.innerHTML = `${element.content}<span class="badge bg-secondary rounded-pill">${element.member_name}</span><span class="badge bg-secondary rounded-pill">Hidden</span>`
+            liNode.innerHTML = `${element.content}<div class="d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-outline-secondary" style="border-style: hidden;">@${element.member_name}</button>
+                <button type="button" class="btn btn-warning" onclick="hiddenComment(${element.id})">Hidden</button>
+              </div>`
           } else {
-            liNode.innerHTML = `${element.content}<span class="badge bg-secondary rounded-pill">${element.member_name}</span>`
+            liNode.innerHTML = `${element.content}<span class="badge bg-secondary rounded-pill">@${element.member_name}</span>`
           }
           ulNode.appendChild(liNode)
         });
@@ -157,6 +176,16 @@
     function getOnePoem() {
       console.log(loginToken)
       get('/api/poem/' + getUrlParameter('id'), getSuccessHandle, false, false, loginToken)
+    }
+
+    function hiddenCommentSuccessHandle(data) {
+      // 隐藏成功的执行函数
+      getOnePoem()
+    }
+
+    function hiddenComment(id) {  // 隐藏评论按钮
+      console.log('准备隐藏：', id)
+      put('/api/reply', JSON.stringify({ member_id: getUrlParameter('user_id'), poem_id: poemID, reply_id: id }), hiddenCommentSuccessHandle, false, false, loginToken)
     }
 
     function submitSuccessHandle(data) {
@@ -172,6 +201,52 @@
       post('/api/reply', JSON.stringify({ member_id: currentUserId, poem_id: poemID, content: inputVal }), submitSuccessHandle, false, false, getUrlParameter('token'))
     }
 
+    function scoreSuccessHandle(data) {
+      getOnePoem()
+    }
+
+    function scoreChange() {
+      // 打分
+      const score = document.getElementById('customRange2').value
+
+      post('/api/score', JSON.stringify({ member_id: currentUserId, poem_id: poemID, score: score }), scoreSuccessHandle, false, false, loginToken)
+    }
+
+
+    function myPoetry(typ) {
+      if (isLogin === false) {
+        return
+      }
+      let tt = 'show_my_self'
+      if (typ === 2) {
+        tt = 'show_my_like'
+      }
+
+      let currentParams = getAllUrlParameterStr()
+      console.log(getUrlParameter('show_my_like'))
+      if (tt === 'show_my_self') {
+        if (getUrlParameter('show_my_like') === 'true') {
+          console.log('ttttt')
+          currentParams = currentParams.replace(/&show_my_like=true/g, "")
+        }
+        if (getUrlParameter('show_my_self') === 'true') {
+          window.location.replace(`./index.html${currentParams}`)
+        } else {
+          window.location.replace(`./index.html${currentParams}&${tt}=true`)
+        }
+      }
+      if (tt === 'show_my_like') {
+        if (getUrlParameter('show_my_self') === 'true') {
+          currentParams = currentParams.replace(/&show_my_self=true/g, "")
+        }
+        if (getUrlParameter('show_my_like') === 'true') {
+          window.location.replace(`./index.html${currentParams}`)
+        } else {
+          window.location.replace(`./index.html${currentParams}&${tt}=true`)
+        }
+      }
+
+    }
   </script>
 </body>
 

@@ -36,6 +36,8 @@ function ajax(url, data, success, cache, alone, async, type, dataType, error, to
         layer.msg('Request failed, request not found');
       } else if (data.status == 503) {
         layer.msg('Request failed, server internal error');
+      } else if (data.status == 400) {
+        layer.msg('Request error');
       } else {
         layer.msg('Request failed, network connection timed out');
       }
@@ -62,10 +64,10 @@ function ajax(url, data, success, cache, alone, async, type, dataType, error, to
     'error': error,
     'jsonpCallback': 'jsonp' + (new Date()).valueOf().toString().substr(-4),
     'beforeSend': function () {
-      layer.msg('Loading', {
-        icon: 16,
-        shade: 0.01
-      });
+      // layer.msg('Loading', {
+      //   icon: 16,
+      //   shade: 0.01
+      // });
     },
   });
 }
@@ -83,6 +85,12 @@ function submitAjax(form, success, cache, alone, token) {
 function post(url, data, success, cache, alone, token) {
   const realUrl = apiUrl + url
   ajax(realUrl, data, success, cache, alone, false, 'post', 'json', null, token);
+}
+
+// ajax提交(put方式提交)
+function put(url, data, success, cache, alone, token) {
+  const realUrl = apiUrl + url
+  ajax(realUrl, data, success, cache, alone, false, 'put', 'json', null, token);
 }
 
 // ajax提交(get方式提交)
