@@ -21,6 +21,9 @@
       </div>
       <div class="col" style="text-align: right;">
         <span>
+          <button type="button" class="btn btn-link" onclick="goToIndexPage()">Index Page</button>
+        </span>
+        <span>
           <button type="button" class="btn btn-link" onclick="myPoetry(1)">My Poetry</button>
         </span>
         <span>
@@ -240,6 +243,14 @@
       getAllPoetry()  // 再次执行获取所有诗歌操作
     }
 
+    function goToIndexPage() {
+      let currentParams = getAllUrlParameterStr()
+
+      currentParams = currentParams.replace(/&show_my_self=true/g, "")
+      currentParams = currentParams.replace(/&show_my_like=true/g, "")
+      window.location.replace(`./index.html${currentParams}`)
+
+    }
   </script>
 </body>
 

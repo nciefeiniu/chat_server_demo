@@ -17,12 +17,18 @@ function loginSuccess(data) { // 登录成功调用的函数
 }
 
 function registerSuccess(data) { // 注册成功调用的函数
-  if (data.meg === 'Login seccess') {
+  if (data.msg === 'Login seccess') {
     const token = data.data.token
     const id = data.data.member_id
     if (token && id >= 0) {
+      console.log('jump')
       window.location.replace('./index.html?token=' + encodeURIComponent(token) + '&user_id=' + encodeURIComponent(id) + '&username=' + encodeURIComponent(userName))
+    } else {
+      console.log(token)
+      console.log(id)
     }
+  } else {
+    console.log(data)
   }
 }
 

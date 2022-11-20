@@ -29,6 +29,9 @@
       </div>
       <div class="col" style="text-align: right;">
         <span>
+          <button type="button" class="btn btn-link" onclick="goToIndexPage()">Index Page</button>
+        </span>
+        <span>
           <button type="button" class="btn btn-link" onclick="myPoetry(1)">My Poetry</button>
         </span>
         <span>
@@ -245,6 +248,17 @@
           window.location.replace(`./index.html${currentParams}&${tt}=true`)
         }
       }
+
+    }
+
+    function goToIndexPage() {
+      let currentParams = getAllUrlParameterStr()
+
+      currentParams = currentParams.replace(/&show_my_self=true/g, "")
+      currentParams = currentParams.replace(/&show_my_like=true/g, "")
+      currentParams = currentParams.replace(new RegExp(`&id=${poemID}`, 'g'), "")
+
+      window.location.replace(`./index.html${currentParams}`)
 
     }
   </script>
