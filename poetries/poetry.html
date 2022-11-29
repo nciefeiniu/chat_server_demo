@@ -165,14 +165,12 @@
       } else {
         console.log('得分', res.final_score)
         const scode = res.final_score
-        const scoreVal = document.getElementById('customRange2')
-        // scoreVal.value = scode
         if (scode === 0) {
 
         } else {
           document.getElementById(`inlineRadio${scode + 3}`).setAttribute('checked', 'true')
           for (let i = 1; i < 6; i++) {
-            document.getElementById(`inlineRadio${i}`).setAttribute('disabled', 'true')
+            // document.getElementById(`inlineRadio${i}`).setAttribute('disabled', 'true')
           }
         }
         // $("#input-1").rating({ 'data-readonly': true, 'value': scode });
