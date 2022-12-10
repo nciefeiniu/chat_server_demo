@@ -1,0 +1,71 @@
+.topics {
+  position: absolute;
+}
+
+.topics #Progress_Status {
+  position: fixed;
+  left: 50%;
+  top: 10%;
+  width: 50%;
+  transform: translateX(-50%);
+  background-color: #ddd;
+}
+
+.topics #myprogressBar {
+  width: 1%;
+  height: 20px;
+  background-color: #b59243;
+  text-align: center;
+  line-height: 20px;
+  color: black;
+}
+
+.topics .inner_topics {
+  width: 540px;
+  height: 400px;
+  background-color: #bbbdc0;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.topics .inner_topics .topics_inp {
+  margin: 15px;
+}
+
+.topics .inner_topics .topics_inp input {
+  width: 330px;
+  height: 43px;
+  border-radius: 8px;
+}
+
+.topics .inner_topics .topics_btn {
+  text-align: center;
+}
+
+.topics .inner_topics .topics_btn .topics_submit {
+  width: 97px;
+  height: 43px;
+  background-color: #b59243;
+  margin-left: 10px;
+  color: white;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.topics .inner_topics .topics_forward {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  margin-top: 15px;
+  font-size: 20px;
+  border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+}
