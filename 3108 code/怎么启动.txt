@@ -1,0 +1,15 @@
+1. 安装file_server
+
+deno install  --allow-read --allow-net https://deno.land/std@0.160.0/http/file_server.ts
+
+2. 安装chat_server
+
+deno install --allow-read --allow-net 'https://cdn.jsdelivr.net/gh/ITECH3108FedUni/assignment_api@2022.05/chat_server.js'
+
+
+3. 启动两个terminal
+
+第一个运行chat_server
+
+第二个运行 file_server
+
