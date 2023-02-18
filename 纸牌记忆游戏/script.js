@@ -1,5 +1,8 @@
 // 设置游戏最长时间，单位是秒
-let maxGameTime = 10; // 这里我设置的3分钟
+let maxGameTime = 60 * 3; // 这里我设置的3分钟
+
+// 设置默认卡片数量
+let defaultCardNumber = 12;
 
 // 卡片数组包含所有卡片
 let card = document.getElementsByClassName("card");
@@ -29,12 +32,30 @@ let modal = document.getElementById("popup1")
 // 打开卡片的数组
 var openedCards = [];
 
+//
+let cardInputDom = document.getElementById('card-number-input');
+
+
+function setCardNumbers() {
+    const cardN = cardInputDom.value;
+    if (cardN < 3 || cardN % 3 !== 0) {
+        // 这是不对的
+        alert("输入的牌数量不正确，请重新输入！")
+    } else {
+        defaultCardNumber = cardN;
+        playAgain();
+    }
+
+}
+
 
 // 游戏初始化
 function gameInit(cardNumber) {
     console.log('init games')
 
     document.getElementById('maxTimer').innerText = `最长游戏时间：${maxGameTime}秒`
+
+    cardInputDom.setAttribute('value', defaultCardNumber)
 
     // 这里就是初始化生成多少张牌（注意是3的倍数）
     if (cardNumber < 3 || cardNumber % 3 !== 0) {
@@ -88,7 +109,7 @@ function startGame() {
     openedCards = [];
 
     // 初始化游戏面板
-    gameInit(24);
+    gameInit(defaultCardNumber);
 
     // 洗牌
     cards = shuffle(cards);
@@ -197,17 +218,13 @@ function moveCounter(stepScore) {
     // 第一次点击时启动计时器
     if (moves == 1) {
         second = 0;
-        minute = 0;
-        hour = 0;
         startTimer();
     }
 }
 
 
 // 显示游戏的时间
-var second = 0,
-    minute = 0;
-hour = 0;
+var second = 0;
 var timer = document.querySelector(".timer");
 var interval;
 
@@ -260,20 +277,31 @@ function closeModal() {
     closeicon.addEventListener("click", function(e) {
         modal.classList.remove("show");
         startGame();
+        addListener();
     });
 }
 
 
 // 再次游戏功能
 function playAgain() {
-    location.replace(document.referrer);
+    // location.replace(document.referrer);
+    modal.classList.remove("show");
+    clearInterval(interval);
+
+    startGame();
+    addListener();
 }
 
 
-// 循环以将事件侦听器添加到每张卡片
-for (var i = 0; i < cards.length; i++) {
-    card = cards[i];
-    card.addEventListener("click", displayCard);
-    card.addEventListener("click", cardOpen);
-    card.addEventListener("click", congratulations);
-};
+function addListener() {
+    // 循环以将事件侦听器添加到每张卡片
+    for (var i = 0; i < cards.length; i++) {
+        card = cards[i];
+        card.addEventListener("click", displayCard);
+        card.addEventListener("click", cardOpen);
+        card.addEventListener("click", congratulations);
+    };
+}
+
+
+addListener();

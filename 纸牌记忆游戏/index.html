@@ -7,8 +7,6 @@
     <meta name="description" content="一个简单的纸牌记忆游戏，简单好玩。:)">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="./style.css">
-    <!-- 导入bootstrap以及字体图标等样式 -->
-    <!-- <link rel="stylesheet prefetch" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"> -->
 </head>
 
 <body>
@@ -23,9 +21,12 @@
                 <li><i class="fa fa-star"></i></li>
                 <li><i class="fa fa-star"></i></li>
             </ul>
-            <span class="moves">0</span>
+            <div><span>设置卡片数量：</span>
+                <span><input type="number" id="card-number-input" onchange="setCardNumbers()"></span>
+            </div>
             <div id="maxTimer"></div>
             <div class="timer" style="color: red;"></div>
+            <span class="moves">0</span>
             <div class="restart" onclick="playAgain()">
                 <i class="fa fa-repeat"></i>
             </div>
