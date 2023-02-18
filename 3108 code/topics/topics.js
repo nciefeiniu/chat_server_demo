@@ -46,7 +46,7 @@ document.querySelector(".text").onchange = function(e) {
     text = e.target.value;
 };
 
-document.getElementById("topics_submit").onclick = function() {
+ function topicSumbit() {
     if (thread_title === "" || icon === "" || text === "") {
         window.alert("No Content");
     } else {
