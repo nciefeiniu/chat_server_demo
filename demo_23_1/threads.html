@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Threads Page</title>
+  <style>
+    #container {
+      width: 400px;
+      min-height: 150px;
+      background-color: darkgray;
+      margin: 10% auto;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    .username-container {
+      display: flex;
+      width: 400px;
+      height: 150px;
+    }
+
+    .margin-auto {
+      margin: auto;
+    }
+
+    .user {
+      margin: auto;
+    }
+
+    .threads-list {
+      text-align: left;
+      width: 300px;
+      margin: 20px auto;
+      background-color: white;
+    }
+
+    .threads-list li {
+      margin-bottom: 10px;
+    }
+
+    .threads-list li a {
+      text-decoration: underline;
+      color: blue;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal .modal-container {
+      width: 404px;
+      height: 512px;
+      background-color: #fff;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      box-sizing: border-box;
+      border-radius: 6px;
+      padding: 1em;
+    }
+
+    .modal .modal-container .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      position: absolute;
+      right: -10px;
+      top: -10px;
+      border: 2px solid #fff;
+      cursor: pointer;
+      background-color: #008c8c;
+      text-align: center;
+      line-height: 30px;
+    }
+    .posts-container {
+      font-size: 12px;
+    }
+    .modal-post {
+      position: absolute;
+      bottom: 10px;
+    }
+    em{
+      font-size: 9px;
+      cursor: pointer;
+      margin-left: 5px;
+      color: red;
+    }
+    .back-container {
+      position: absolute;
+      top: 30px;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div id="container">
+    
+  </div>
+  <script src="./js/threads.js"></script>
+</body>
+
+</html>
