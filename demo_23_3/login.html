@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" type="text/css" href="./index.css">
+  </link>
+
+</head>
+
+<body>
+  <div class="login-div">
+    <form>
+      <label><text>username:</text></label>
+      <input type="text" name="username" id="username">
+    </form>
+    <input class="login-button" type="button" value="Login" autofocus onclick="login()">
+  </div>
+
+  <script>
+    const apiBaseUrl = "http://127.0.0.1:7777"
+
+    const serverUsers = {}
+
+    window.onload = function () {  // 页面加载完成自动执行，这里也是这个页面的入口
+      fetchAllUsers()  // 获取所有的用户信息
+    }
+
+    function fetchAllUsers() {
+      // 获取所有的用户信息 ，数据存储在  serverUsers 里面
+      fetch(apiBaseUrl + "/api/users").then((response) => {
+        return response.json()
+      }).then((data) => {
+        data.forEach(function (item) {
+          serverUsers[item['username']] = item['name']
+        })
+      })
+    }
+
+    function login() { // 用户点击 Login 按钮，会执行这个函数
+      const name = document.getElementById("username").value;  // 获取用户输入的username
+      if (name == "" || name == null || name == undefined) {  // 判断用户输入是否为空
+        alert("Username can not be empty")
+        return
+      }
+      if (!serverUsers.hasOwnProperty(name)) {  // 判断是否有这个用户
+        alert("username does not exist")  // 没有就弹出提示
+        return
+      }
+      // 有这个用户，就是登录成功了，跳转到 index 页面
+      window.location.href = "./index.html?username=" + name + "&name=" + serverUsers[name];
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thread</title>
+  <link rel="stylesheet" type="text/css" href="./index.css">
+</head>
+
+<body>
+
+  <div class="thread-main-box">
+    <div>
+      <span style="margin-right: 300px;">Topics: </span> 
+      <!-- 这里使用 history 进行跳转回去 -->
+      <span style="cursor: pointer; color:brown; text-decoration: underline;" onclick="javascript:history.back()">Back</span>
+    </div>
+    <div class="threads-box" id="threads-box">
+      <ul id="posts-olItem">
+      </ul>
+    </div>
+
+    <div class="items">
+      <div class="inline-left">
+        <input id="userInput" name="postInput">
+      </div>
+      <div class="flow-right"><input type="button" value="Post" onclick="addNewPost()" /></div>
+    </div>
+
+  </div>
+  <script>
+    const apiBaseUrl = "http://127.0.0.1:7777"
+    const threadsOl = document.getElementById("posts-olItem")
+    let threadUser = null
+
+    window.onload = () => {
+      // 页面加载完成，自动执行这里的
+      getAllPosts()
+      setInterval(getAllPosts, 1000 * 10)  // 设置定时任务，每10秒钟获取一个posts
+    }
+
+
+    var getAllPosts = function () {
+      // 获取所有posts的方法
+      const postId = getUrlParameter("id")
+      threadsOl.innerText = ""
+
+      fetch(apiBaseUrl + "/api/threads/" + postId).then((response) => { return response.json() }).then(
+        (data) => {
+          console.log(data)
+          data['posts'].forEach(function (item) {
+            const li = document.createElement("li")
+            li.innerHTML = `<div>${item.text}</div><div>- ${item.user}</div>`
+            threadsOl.appendChild(li)
+          })
+        }
+      ).then(()=>{
+        // 这是移动到最底部
+        const postsItems = document.getElementById('posts-olItem')
+        postsItems.scrollTo(0, postsItems.scrollHeight)
+
+      })
+    }
+
+    function addNewPost() {
+      // send a message to post
+      const postId = getUrlParameter("id")
+      const text = document.getElementById("userInput").value
+      const username = decodeURIComponent(getUrlParameter("username"))
+
+      if (text == "" || text == null || text == undefined) {
+        alert("post can not be empty")
+        return
+      }
+
+      if (postId == "" || postId == null || postId == undefined) {
+        alert("firstPost can not be empty!")
+        return
+      }
+      fetch(apiBaseUrl + "/api/threads/" + postId + "/posts", {
+        method: "post",
+        body: JSON.stringify({
+          "text": text,
+          "user": username,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((data) => {
+        getAllPosts(); // 发送成功后，会再次请求获取所有的POST，并渲染在页面上
+      }).then(() => {
+        document.getElementById("userInput").value = ''
+      })
+
+      
+    }
+
+    var getUrlParameter = function (key) {
+      key = key.replace(/[]/, "\[").replace(/[]/, "\[").replace(/[]/, "\\\]")
+      const regex = new RegExp("[\\?&]" + key + "=([^&#]*)")
+      const results = regex.exec(window.location.href)
+      if (results == null)
+        return ""
+      else {
+        return results[1]
+      }
+    }
+  </script>
+</body>
+
+</html>

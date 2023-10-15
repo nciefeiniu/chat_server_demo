@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Index</title>
+  <link rel="stylesheet" type="text/css" href="./index.css">
+  </link>
+</head>
+
+<body>
+
+  <dialog id="dialog">
+    <h2>Add New Thread</h2>
+    <form style="margin-bottom: 10px;" id="add-thread-form">
+      <div>
+        <label for="title">Title:</label>
+        <input type="text" name="title" placeholder="Enter title">
+      </div>
+      <div>
+        <label for="text">Post:</label>
+        <input type="text" name="text" placeholder="First post">
+      </div>
+    </form>
+    <button onclick="clickDialogBtn('cancel')">Cancel</button>
+    <button onclick="clickDialogBtn('submit')">Create</button>
+
+  </dialog>
+
+  <div class="thread-main-box">
+    <div style="text-align: center;" class="username-box">Logged in as xx</div>
+    <div class="items">
+      <div class="inline-box-left">Threads: </div>
+      <div class="inline-box-right"><button onclick="addNewThread()">New thread</button></div>
+    </div>
+    <div class="threads-box" id="threads-box">
+      <ol id="threads-olItem">
+      </ol>
+    </div>
+  </div>
+  <script>
+    const apiBaseUrl = "http://localhost:7777"
+    var addThreadDialog = undefined
+    var threadsOlNode = undefined
+
+    window.onload = () => {
+      addThreadDialog = document.getElementById("dialog")  // 这是添加thread弹窗
+      threadsOlNode = document.getElementById("threads-olItem")  // 这是显示所有Thread的标签
+      document.querySelector('.username-box').innerText = 'Logged in as ' + decodeURIComponent(getUrlParameter("name"))
+      getAllThreads()
+    }
+
+
+    function getAllThreads() {
+      // 获取所有的Thread，使用fetch 进行获取，获取后渲染到页面上
+
+      threadsOlNode.innerHTML = ""
+      fetch(apiBaseUrl + "/api/threads").then((response) => { return response.json() }).then((data) => {
+        data.forEach((item) => {  // 一条一条数据的渲染到页面上
+          const li = document.createElement("li");
+          li.innerHTML = `<span onclick="goToThread(${item.id})">${item.thread_title}</span>` + (item.user === getUrlParameter('username') ? `&nbsp;&nbsp;<span><i onclick="deleteThread(${item.id})">X</i></span>` : '')
+          threadsOlNode.appendChild(li)
+        })
+      })
+    }
+
+    function goToThread(id) {
+      // 用户点击某个thread，就会跳转到对应的thread页面去
+      window.location.href = `./thread.html?id=${id}&name=${decodeURIComponent(getUrlParameter("name"))}&username=${decodeURIComponent(getUrlParameter("username"))}`;
+    }
+
+    function deleteThread(id) {
+      // 点击删除按钮，会执行这里的步骤
+      console.log('delete thread, thread id:', id)
+      fetch(`${apiBaseUrl}/api/threads/${id}`, {
+        method: "delete",
+        body: JSON.stringify({
+          user: decodeURIComponent(getUrlParameter('username')),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(function (data) {
+        // 删除成功后，需要重新获取threads
+        getAllThreads();
+      });
+    }
+
+    function addNewThread() {
+      const overlayNode = document.createElement('div')
+      overlayNode.setAttribute('class', 'overlay')
+      document.body.appendChild(overlayNode)
+      addThreadDialog.showModal()
+    }
+
+    function clickDialogBtn(event) {
+
+      if (event === 'cancel') {
+        addThreadDialog.close()
+        const overlayNode = document.querySelector('.overlay')
+        overlayNode.remove()  // 移除遮罩
+        return
+      }
+      const username = getUrlParameter("username")
+      const form = document.getElementById('add-thread-form')
+
+      const formData = new FormData(form); // form为表单对象
+
+
+      const title = formData.get('title')
+      const firstPost = formData.get('text')
+      if (title == "" || title == null || title == undefined) {
+        alert("Thread title can not be empty")
+        return
+      }
+      if (firstPost == "" || firstPost == null || firstPost == undefined) {
+        alert("firstPost can not be empty")
+        return
+      }
+      if (username == "" || username == null || username == undefined) {
+        alert("username can not be empty, Please jump from the right place!")
+        return
+      }
+      fetch(apiBaseUrl + '/api/threads/', {
+        method: "post",
+        body: JSON.stringify({
+          "user": decodeURIComponent(getUrlParameter('username')),
+          "thread_title": title,
+          "icon": "1",
+          "text": firstPost,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((data) => {
+        getAllThreads(); // 发送成功后，会再次请求获取所有的POST，并渲染在页面上
+      }).then(() => {
+        addThreadDialog.close()
+        const overlayNode = document.querySelector('.overlay')
+        overlayNode.remove()  // 移除遮罩
+      })
+
+    }
+
+    function getUrlParameter(key) {
+      key = key.replace(/[]/, "\[").replace(/[]/, "\[").replace(/[]/, "\\\]")
+      const regex = new RegExp("[\\?&]" + key + "=([^&#]*)")
+      const results = regex.exec(window.location.href)
+      if (results == null)
+        return ""
+      else {
+        return results[1]
+      }
+    }
+  </script>
+
+</body>
+
+</html>
