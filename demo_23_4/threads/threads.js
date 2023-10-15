@@ -11,6 +11,11 @@ window.onload = () => {
   getThreads();
 };
 
+document.querySelector(".newbtn").onclick = () => {
+  // 用户点击新建Thread会运行这里
+  location.href = `./topics.html?name=${userInfo.name}&username=${userInfo.username}`;
+};
+
 function getThreads() {
   // 获取所有的Thread
   fetch(`http://localhost:7777/api/threads`)
@@ -22,17 +27,8 @@ function getThreads() {
     });
 }
 
-document.querySelector(".newbtn").onclick = () => {
-  // 用户点击新建Thread会运行这里
-  location.href = `./topics.html?name=${userInfo.name}&username=${userInfo.username}`;
-};
-
-document.querySelector(".topics_forward").onclick = () => {
-  history.back(); // 当用户点击回退按钮的时候，这里使用history的api进行回退
-};
-
 var allPosts = (e, id) => {
-    // 获取所有posts的方法
+  // 获取所有posts的方法
   fetch(`http://localhost:7777/api/threads/${id}/posts`)
     .then((data) => {
       return data.json();
@@ -40,6 +36,10 @@ var allPosts = (e, id) => {
     .then((data) => {
       renderTextArr(e, data, id); // 通过这个方法，把获取到的数据渲染到HTML页面上
     });
+};
+
+document.querySelector(".topics_forward").onclick = () => {
+  history.back(); // 当用户点击回退按钮的时候，这里使用history的api进行回退
 };
 
 var renderLi = (data) => {
@@ -175,6 +175,7 @@ var renderTextArr = (e, res, id) => {
           })
           .then((data) => {
             allPosts(e, id);
+            setInterval(() => {allPosts(e, id)}, 1000 * 10)
           });
       } else {
         alert("NO Content");
