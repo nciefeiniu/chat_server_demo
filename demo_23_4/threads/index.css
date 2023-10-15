@@ -1,0 +1,86 @@
+.threads {
+  position: absolute;
+}
+
+.threads .inner_threads {
+  width: 458px;
+  height: 550px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #bbbdc0;
+}
+
+.threads .inner_threads .topics_forward {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  margin-top: 15px;
+  margin-left: 10px;
+  font-size: 20px;
+  border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.threads .inner_threads .threads_header {
+  text-align: right;
+  margin-right: 10px;
+}
+
+.threads .inner_threads .threads_button {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.threads .inner_threads .threads_button button {
+  width: 164px;
+  height: 42px;
+  background-color: #b59243;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.threads .inner_threads .threads_list {
+  list-style: none;
+  width: 80%;
+  height: 310px;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.threads .inner_threads .threads_list li {
+  margin-bottom: 10px;
+}
+
+.threads .inner_threads .threads_list li a {
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}
+
+.threads .inner_threads .threads_btn input {
+  width: 180px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.threads .inner_threads .threads_btn .threads_post {
+  width: 97px;
+  height: 43px;
+  background-color: #b59243;
+  margin-left: 10px;
+  color: white;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}

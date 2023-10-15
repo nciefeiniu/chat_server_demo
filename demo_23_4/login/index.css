@@ -1,0 +1,51 @@
+.login {
+  position: absolute;
+}
+
+.login #Progress_Status {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  width: 50%;
+  transform: translateX(-50%);
+  background-color: #ddd;
+}
+
+.login #myprogressBar {
+  width: 1%;
+  height: 20px;
+  background-color: #b59243;
+  text-align: center;
+  line-height: 20px;
+  color: black;
+}
+
+.login .inner-login {
+  width: 457px;
+  height: 151px;
+  background-color: #bbbdc0;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.login .user input {
+  width: 180px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.login .user button {
+  width: 97px;
+  height: 43px;
+  background-color: #b59243;
+  margin-left: 10px;
+  color: white;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
