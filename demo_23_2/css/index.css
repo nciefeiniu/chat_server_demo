@@ -1,0 +1,68 @@
+.threads_div {
+  width: 400px;
+  min-height: 100px;
+  position: absolute;
+  background-color: #dcdcdc;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+
+.posts_div {
+  width: 400px;
+  min-height: 100px;
+  position: absolute;
+  background-color: #dcdcdc;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -30%);
+  font-size: 12px;
+}
+
+.threads {
+  margin: 10px;
+}
+.slate_color {
+  color: slategrey;
+
+}
+
+.username_div {
+  text-align: right;
+  margin: 5px;
+}
+
+.new_thread_btn{
+  background-color: antiquewhite;
+  border: 0px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.threads_ul{
+  background-color: white;
+}
+
+.threads_ul li {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  padding:  5px;
+}
+
+.post_ul{
+  background-color: white;
+  overflow: scroll;
+  max-height: 250px;
+}
+.post_ul li {
+  color: dimgray;
+  padding: 5px;
+  list-style-type:none;
+
+}
+
+input {
+  outline: none;
+}
