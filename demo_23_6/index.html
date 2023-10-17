@@ -128,7 +128,9 @@
     // setInterval
 
     window.onload = () => {
-      if (!username) {
+      console.log('username: ', username)
+      if (!username || username == null || username === 'null') {
+        console.log('Not Logged In')
         return (window.location.href = "./login.html");
       }
       document.getElementById("username").innerText = name;
