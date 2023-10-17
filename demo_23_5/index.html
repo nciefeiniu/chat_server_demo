@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+  <style>
+    /* 将 body 和 html 的高度设为 100% */
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+    }
+
+    /* 创建一个容器来居中内容 */
+    .center-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    /* 设置登录表单的样式 */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    /* 设置输入框的样式 */
+    input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      margin-bottom: 10px;
+    }
+
+    /* 设置按钮的样式 */
+    button[type="submit"] {
+      padding: 10px;
+      width: 100px;
+    }
+
+    p {
+      font-weight: 700;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="center-container">
+    <form class="login-form" onsubmit="return false">
+      <p>Welcome</p>
+      <input type="text" id="username" name="username" placeholder="Enter username" />
+      <button type="submit" onclick="login()">Login</button>
+    </form>
+  </div>
+  <script src="./js/fetch_api.js"></script>
+  <script>
+    var all_user = [];
+
+    window.onload = () => {
+      // 页面加载好自动执行
+      allUsers(getAllUsers);
+    };
+
+    function getAllUsers(data) {
+      all_user = data; // 设置这个变量为api返回的数据
+    }
+
+    function login() {
+      let loginSuccess = false;
+      const username = document.getElementById("username").value;
+      if (!username) {
+        alert("username cannot be empty");
+        return;
+      }
+      all_user.forEach((item) => {
+        if (item.username === username) {
+          console.log('login success')
+          loginSuccess = true;
+          window.location.href = `./thread.html?username=${encodeURIComponent(item.username)}&name=${encodeURIComponent(item.name)}`;
+          return;
+        }
+      });
+      if (!loginSuccess) {
+        alert("Username does not exist");
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -19,6 +19,8 @@ document.querySelector(".login-btn").onclick = function() {
                     return data.json()
                 }
             }).then((data) => {
+                console.log('data:', data)
+
                 if (!data) {
                     // 登录失败
                 } else {

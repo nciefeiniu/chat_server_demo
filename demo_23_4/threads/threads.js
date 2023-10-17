@@ -2,7 +2,7 @@ const urlParams = decodeURIComponent(location.search.slice(1)).split("&");
 const userInfo = {};
 for (let i = 0; i < urlParams.length; i++) {
   const tmp = urlParams[i].split("=");
-  userInfo[tmp[0]] = tmp[1];
+  userInfo[tmp[0]] = decodeURIComponent(tmp[1]);
 }
 
 window.onload = () => {

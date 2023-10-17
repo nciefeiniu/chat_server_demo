@@ -45,6 +45,10 @@
     var threadsOlNode = undefined
 
     window.onload = () => {
+      if (!getUrlParameter("name")) {
+        window.location.href = './login.html'
+        return
+      }
       addThreadDialog = document.getElementById("dialog")  // 这是添加thread弹窗
       threadsOlNode = document.getElementById("threads-olItem")  // 这是显示所有Thread的标签
       document.querySelector('.username-box').innerText = 'Logged in as ' + decodeURIComponent(getUrlParameter("name"))

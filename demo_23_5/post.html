@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-window {
+      width: 400px;
+      height: 300px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: scroll;
+      border-radius: 5px;
+    }
+
+    .message {
+      background-color: #f2f2f2;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .user-message {
+      text-align: right;
+    }
+
+    .input-area {
+      margin-top: 10px;
+      display: flex;
+    }
+
+    .input-area input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .input-area input[type="submit"] {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #ccc;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-container">
+    <h3 id="thread-title">xxxx</h3>
+    <div class="chat-window">
+      <div class="message">
+        <span class="user">User1:</span>
+        <span class="text">Hello!</span>
+      </div>
+      <div class="message user-message">
+        <span class="text">Hi there!</span>
+        <span class="user">User2:</span>
+      </div>
+      <div class="message">
+        <span class="user">User1:</span>
+        <span class="text">How are you?</span>
+      </div>
+      <div class="message user-message">
+        <span class="text">I'm good, thanks!</span>
+        <span class="user">User2:</span>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Type your message" required>
+      <input type="submit" value="Send" onclick="sendMessage()">
+    </div>
+
+    <button class="back-button" onclick="goBack()">Back</button>
+  </div>
+  <script src="./js/fetch_api.js"></script>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = decodeURIComponent(urlParams.get('username'))
+    const title = decodeURIComponent(urlParams.get('title'))
+    const id = decodeURIComponent(urlParams.get('id'))
+
+    window.onload = () => {
+      document.getElementById('thread-title').innerText = title
+      allPosts(id, renderPost)
+      setInterval(() => {  // 自动每10秒钟获取一次所有post
+        allPosts(id, renderPost)
+      }, 10000)
+    }
+
+    function renderPost(data) {
+      const messageBox = document.querySelector('.chat-window')
+      let boxMessage = ''
+      data.forEach(element => {
+        if (element.user === username) {
+          boxMessage += `<div class="message user-message">
+                          <span class="text">${element.text}</span>
+                          <span class="user"> - ${element.name}</span>
+                        </div>`
+        } else {
+          boxMessage += `<div class="message">
+                          <span class="user">${element.name} : </span>
+                          <span class="text">${element.text}</span>
+                        </div>`
+        }
+        
+      });
+      messageBox.innerHTML = boxMessage
+    }
+
+    function sendMessage() {
+      const chatWindow = document.querySelector('.chat-window');
+      const messageInput = document.getElementById('messageInput');
+      const message = messageInput.value.trim();
+      if (message !== '') {
+        sendPost(id, username, message, allPosts, [id, renderPost])
+        // appendMessage('User1', message);
+        messageInput.value = '';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      } else {
+        alert('Message cannot be empty')
+      }
+    }
+
+    function appendMessage(user, text) {
+      const chatWindow = document.querySelector('.chat-window');
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+
+      const userSpan = document.createElement('span');
+      userSpan.className = 'user';
+      userSpan.textContent = user + ':';
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'text';
+      textSpan.textContent = text;
+
+      messageDiv.appendChild(userSpan);
+      messageDiv.appendChild(textSpan);
+
+      chatWindow.appendChild(messageDiv);
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+
+</html>
