@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('bg.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    .login-form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    
+    .login-form input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+    
+    .login-form input[type="submit"] {
+      width: 100px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .error-message {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-form">
+      <form>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="submit" value="Login" onclick="checkUsername(event)">
+      </form>
+      <p class="error-message" id="error-message"></p>
+    </div>
+  </div>
+  
+  <script>
+    function checkUsername(event) {
+      event.preventDefault();
+      
+      const usernameInput = document.getElementById('username');
+      const errorMessage = document.getElementById('error-message');
+      
+      const username = usernameInput.value.trim();
+      if (username !== '') {
+        const apiUrl = 'http://127.0.0.1:7777/api/users';
+        
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            const users = data;
+            const existingUser = users.find(user => user.username === username);
+            
+            if (existingUser) {
+              console.log(existingUser)
+              errorMessage.textContent = 'Login successful, will redirect in 2 seconds';
+              setTimeout(() => {
+                const params = Object.entries(existingUser)
+                  .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                  .join('&');
+                window.location.href = `./index.html?` + params
+              }, 1500)
+            } else {
+              errorMessage.textContent = '';
+              alert('Username is valid. Proceed with login.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            errorMessage.textContent = 'Error occurred while checking username.';
+          });
+      } else {
+        errorMessage.textContent = 'Please enter a username.';
+      }
+    }
+  </script>
+</body>
+</html>
