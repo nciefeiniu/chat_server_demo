@@ -43,17 +43,28 @@ cargo install deno
 ## 2. 安装 chat_server
 
 ```bash
-deno install --allow-read --allow-net https://cdn.jsdelivr.net/gh/ITECH3108FedUni/assignment_api/chat_server.js
+deno install --allow-read --allow-net https://cdn.jsdelivr.net/gh/ITECH3108FedUni/assignment_api@v2022.05/chat_server.js
 ```
 
 运行 chat_server
 
 ```bash
-deno run --allow-read --allow-net 'https://cdn.jsdelivr.net/gh/ITECH3108FedUni/assignment_api/chat_server.js' "$@"
+deno run --allow-read --allow-net 'https://cdn.jsdelivr.net/gh/ITECH3108FedUni/assignment_api@v2022.05/chat_server.js' "$@"
 ```
-
-然后用浏览器打开 `demo1/login.html`
 
 注意：因为不能自己创建用户，所以需要根据 chat_server 里面已有的用户登录
 
 查看所有用户 API [http://127.0.0.1:7777/api/users]()
+
+
+
+## 3. 安装file_server
+
+```bash
+# deno 直接运行file_server，但是注意，这个需要在目录下面，比如 demo_23_1，你需要先cd demo_23_1，然后在执行下面的命令
+deno run --allow-net --allow-read --watch https://deno.land/std@0.157.0/http/file_server.ts ./
+```
+
+## 4. 用浏览器打开网页
+
+打开这个网址即可 [http://localhost:4507/](http://localhost:4507/)

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="./css/login.css">
+  </link>
+</head>
+
+<body>
+  <div class="login-container">
+    <h1>Login</h1>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Username" required>
+        <p class="error-message" id="error-message"></p>
+      </div>
+      <button type="submit" class="submit-btn">Login</button>
+    </form>
+  </div>
+  <script>
+
+    const form = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const errorMessage = document.getElementById('error-message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = usernameInput.value;
+      const response = await fetch('http://localhost:7777/api/users');
+      const users = await response.json();
+
+      const existingUser = users.find(user => user.username === username);
+      if (existingUser) {
+        // 用户名存在
+        errorMessage.textContent = '';
+        console.log('用户名存在，执行登录逻辑', existingUser);
+        // 在这里可以执行登录逻辑，例如跳转到另一个页面
+        window.location.href = './index.html?' + objectToQueryString(existingUser);
+
+      } else {
+        // 用户名不存在
+        errorMessage.textContent = 'The username does not exist. Please re-enter it.';
+      }
+    });
+
+    function objectToQueryString(obj) {
+      const queryParams = [];
+
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const encodedKey = encodeURIComponent(key);
+          const encodedValue = encodeURIComponent(obj[key]);
+          queryParams.push(`${encodedKey}=${encodedValue}`);
+        }
+      }
+
+      return queryParams.join('&');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 400px;
+      margin: 100px auto;
+      background-color: #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .container input,
+    .container textarea {
+      width: 90%;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+
+    .container button {
+      padding: 5px 10px;
+    }
+  </style>
+  <script>
+    // 提交数据的函数
+    function postData() {
+      var title = document.getElementById('title').value;
+      var icon = document.getElementById('icon').value;
+      var post = document.getElementById('post').value;
+
+      var data = {
+        thread_title: title,
+        icon: icon,
+        text: post,
+        user: decodeURIComponent(getUrlParameter('username'))
+      };
+
+      fetch('http://127.0.0.1:7777/api/threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(function (response) {
+
+          alert('Data submitted successfully!');
+          window.history.back()
+        })
+        .catch(function (error) {
+          alert('An error occurred. Please try again later.');
+          console.error(error);
+        });
+    }
+    
+
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      let results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Create New Thread</h2>
+    <input type="text" id="title" placeholder="Title">
+    <input type="text" id="icon" placeholder="Icon">
+    <textarea id="post" placeholder="Post"></textarea>
+    <button onclick="postData()">Submit</button>
+    <button onclick="window.history.back()">Back</button>
+  </div>
+</body>
+
+</html>

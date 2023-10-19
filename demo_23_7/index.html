@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="./css/index.css">
+  </link>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="username">Logged in as xxx</span>
+    </div>
+    <div class="header">
+      <span class="thread">Thread</span>
+      <button class="new-thread" onclick="redirectToNewThread()">New Thread</button>
+    </div>
+    <div class="content">
+      <ul id="threadList">
+        <li><a href="#">Link 1</a></li>
+        <li><a href="#">Link 2</a></li>
+        <li><a href="#">Link 3</a></li>
+        <!-- 添加更多的 <li> 和 <a> 元素作为链接 -->
+      </ul>
+    </div>
+  </div>
+  <div class="overlay" id="overlay"></div>
+
+  <div class="chat-box" id="chatBox">
+    <!-- 聊天框的内容 -->
+    <h3>聊天框</h3>
+    <ul class="message-list" id="messageList"></ul>
+    <input type="text" id="messageInput" placeholder="输入消息">
+    <button onclick="sendMessage()">发送</button>
+    <button onclick="closeChatBox()">关闭</button>
+  </div>
+  <script>
+    var currentThreadTitle = ''; // 当前聊天框的标题
+    var currentThreadID = ''
+    var username = getUrlParameter('username');
+    var name = getUrlParameter('name');
+    var setIntervalId = null
+
+    window.onload = function () {
+
+      if (!username || username === 'null') {
+        window.location.href = './login.html'
+        return
+      }
+
+      // 在页面上显示获取到的用户名和名称
+      document.querySelector('.username').textContent = 'Logged in as ' + name;
+      getThreads()
+    };
+
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      let results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    function getThreads() {
+      fetch('http://127.0.0.1:7777/api/threads')
+        .then(function (response) {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to fetch threads.');
+          }
+        })
+        .then(function (data) {
+          var ul = document.getElementById('threadList'); // 获取 ul 元素，需要给 <ul> 设置一个 id 属性为 "threadList"
+          ul.innerHTML = ''
+          // 遍历数据并创建 <li> 元素
+          data.forEach(function (thread) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.textContent = thread.thread_title;
+            a.href = '#';
+            a.addEventListener('click', function () {
+              openChatBox(thread.id, thread.thread_title);
+            });
+            li.appendChild(a);
+
+            if (thread.user === username) {
+              var delBtn = document.createElement('button')
+              delBtn.setAttribute('class', 'del-btn')
+              delBtn.textContent = 'del'
+              delBtn.addEventListener('click', function () {
+                deleteMyThread(thread.id)
+              });
+              li.appendChild(delBtn)
+            }
+
+            ul.appendChild(li);
+          });
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
+    }
+
+    function redirectToNewThread() {
+      window.location.href = './new_thread.html' + window.location.search;
+    }
+
+    function openChatBox(threadID, threadTitle) {
+      if (!setIntervalId) {
+        setIntervalId = setInterval(() => {
+          openChatBox(threadID, threadTitle)
+        }, 10000)
+      }
+
+      currentThreadTitle = threadTitle;
+      currentThreadID = threadID;
+      var chatBox = document.getElementById('chatBox');
+      var overlay = document.getElementById('overlay')
+      overlay.style.display = 'block';
+      chatBox.style.display = 'block';
+      chatBox.querySelector('h3').textContent = threadTitle;
+      clearMessageList();
+      // 获取聊天记录并显示在聊天框中
+      fetch(`http://localhost:7777/api/threads/${currentThreadID}/posts`)
+        .then(function (response) {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to fetch messages.');
+          }
+        })
+        .then(function (data) {
+          var messageList = document.getElementById('messageList');
+          // 遍历数据并创建聊天记录的 <li> 元素
+          data.forEach(function (message) {
+            var li = document.createElement('li');
+            var sender = document.createElement('div');
+            sender.classList.add('sender');
+            sender.textContent = message.name;
+            var content = document.createElement('div');
+            content.textContent = message.text;
+            li.appendChild(sender);
+            li.appendChild(content);
+            messageList.appendChild(li);
+          });
+          messageList.scrollTop = messageList.scrollHeight;
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
+    }
+
+    function clearMessageList() {
+      var messageList = document.getElementById('messageList');
+      messageList.innerHTML = '';
+    }
+
+    function sendMessage() {
+      var messageInput = document.getElementById('messageInput');
+      var message = messageInput.value.trim();
+      if (message === '') {
+        return;
+      }
+      // 将消息发送到服务器
+      fetch(`http://127.0.0.1:7777/api/threads/${currentThreadID}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user: username,
+          text: message
+        })
+      })
+        .then(function (response) {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to send message.');
+          }
+        })
+        .then(function (data) {
+          openChatBox(currentThreadID, currentThreadTitle)
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
+    }
+
+    function closeChatBox() {
+      var chatBox = document.getElementById('chatBox');
+      var overlay = document.getElementById('overlay')
+      chatBox.style.display = 'none';
+      overlay.style.display = 'none';
+
+      if (setIntervalId) {
+        clearInterval(setIntervalId)
+      }
+      setIntervalId = null
+      currentThreadTitle = '';
+      currentThreadID = ''
+      clearMessageList();
+    }
+
+    function deleteMyThread(threadId) {
+      fetch(`http://127.0.0.1:7777/api/threads/${threadId}`, {
+        method: "delete",
+        body: JSON.stringify({
+          user: username,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+
+          getThreads()
+        })
+    }
+  </script>
+</body>
+
+</html>
