@@ -2,6 +2,8 @@
 <html>
 
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
   <link rel="stylesheet" href="./css/index.css">
   </link>
 </head>
@@ -23,6 +25,7 @@
         <!-- 添加更多的 <li> 和 <a> 元素作为链接 -->
       </ul>
     </div>
+    <div><button onclick="window.history.go(-window.history.length + 1);">Logout</button></div>
   </div>
   <div class="overlay" id="overlay"></div>
 
@@ -30,9 +33,9 @@
     <!-- 聊天框的内容 -->
     <h3>聊天框</h3>
     <ul class="message-list" id="messageList"></ul>
-    <input type="text" id="messageInput" placeholder="输入消息">
-    <button onclick="sendMessage()">发送</button>
-    <button onclick="closeChatBox()">关闭</button>
+    <input type="text" id="messageInput" placeholder="message">
+    <button onclick="sendMessage()">send</button>
+    <button onclick="closeChatBox()">close</button>
   </div>
   <script>
     var currentThreadTitle = ''; // 当前聊天框的标题
