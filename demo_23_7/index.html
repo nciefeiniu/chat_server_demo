@@ -25,7 +25,7 @@
         <!-- 添加更多的 <li> 和 <a> 元素作为链接 -->
       </ul>
     </div>
-    <div><button onclick="window.history.go(-window.history.length + 1);">Logout</button></div>
+    <div><button onclick="window.location.replace('./login.html')">Logout</button></div>
   </div>
   <div class="overlay" id="overlay"></div>
 
@@ -55,6 +55,14 @@
       document.querySelector('.username').textContent = 'Logged in as ' + name;
       getThreads()
     };
+
+    window.addEventListener('pageshow', (event) => {
+      console.log(event)
+      if (event.persisted) {
+        console.log('show')
+        getThreads()
+      }
+    })
 
     function getUrlParameter(name) {
       name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
