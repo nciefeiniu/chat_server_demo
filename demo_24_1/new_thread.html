@@ -41,20 +41,51 @@
       display: block;
       margin: 5px;
     }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .submit-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .back-btn {
+      border: none;
+      background-color: yellow;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <div style="text-align: right">
-      Logged in as <span id="logged-name"></span>
-    </div>
+    <button class="back-btn">Back</button>
+
     <div class="threads-container">
-      <div>
-        <span>Threads</span>
-        <span style="margin-left: 50%"><button onclick="createNewPost()">New Thread</button></span>
-      </div>
-      <div class="all-threads" id="all-threads"></div>
+      <form id="myForm">
+        <label for="thread_title">Thread Title:</label>
+        <input type="text" id="thread_title" name="thread_title" required>
+
+        <label for="icon">Icon:</label>
+        <input type="text" id="icon" name="icon" required>
+
+        <label for="text">Text:</label>
+        <textarea id="text" name="text" rows="4" required></textarea>
+
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
     </div>
   </div>
   <script>
@@ -79,33 +110,37 @@
       return true;
     }
 
-    function renderThreads(threads) {
-      // 渲染所有的thread到页面显示
-      const threadsDom = document.getElementById("all-threads");
-      threadsDom.innerHTML = "";
-      threads.forEach((item) => {
-        const threadNone = document.createElement("a");
-        threadNone.href = `thread.html?id=${item.id}&username=${getQueryVariable('username')}&name=${getQueryVariable('name')}`; // 使用实际的Thread URL替换
-        threadNone.innerText = item.thread_title;
-        threadsDom.appendChild(threadNone);
-      });
-    }
 
-    function getAllThreads() {
-      fetch("http://127.0.0.1:7777/api/threads")
-        .then((response) => response.json())
-        .then((res) => {
-          allThreads = res;
-          renderThreads(res); // 渲染页面
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(document.getElementById('myForm'));
+      formData.append('user', currentUsername);
+
+      fetch('http://127.0.0.1:7777/api/threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(Object.fromEntries(formData))
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Data submission successful!');
+            window.history.back();
+          } else {
+            alert('Data submission failed!');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
         });
-    }
+    });
 
-    function createNewPost() {
-      // 创建一个新的post
-      window.location.href = `new_thread.html?username=${encodeURIComponent(
-        currentUsername
-        )}&name=${encodeURIComponent(currentName)}`;      
-    }
+    document.querySelector('.back-btn').addEventListener('click', () => {
+      // 给 返回按钮增加监听 点击事件，只要点击了 Back 按钮，就会使用 window.history.back() 方法返回上一页
+      window.history.back();
+    })
   </script>
   <script>
     var currentUsername,
@@ -120,11 +155,6 @@
       }
       currentUsername = decodeURIComponent(getQueryVariable("username")); // 获取登录的用户
       currentName = decodeURIComponent(getQueryVariable("name")); // 获取登录的Name
-      document.getElementById("logged-name").innerText = currentName;
-      console.log(
-        `Login Success, UserName: ${currentUsername}, name: ${currentName}`
-      );
-      getAllThreads(); // 获取所有thread
     };
   </script>
 </body>

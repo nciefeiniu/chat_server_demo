@@ -1,125 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login Page</title>
-    <style>
-      body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #f0f0f0;
-      }
-      .container {
-        width: 400px;
-        height: 200px;
-        background-color: gray;
-        display: flex;
-        align-items: center;
-        padding: 20px;
-        flex-direction: column;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      }
-      .input-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 60px;
-      }
-      input[type="text"] {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 200px;
-      }
-      button {
-        padding: 10px 15px;
-        background-color: #c6d46b;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      .message {
-        font-size: 12px;
-        margin-top: 10px;
-        color: red;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="enter one user name" />
-        <button type="button" id="login-button">Login</button>
-      </div>
 
-      <div class="message" id="message"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Page</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      width: 400px;
+      height: 200px;
+      background-color: gray;
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      flex-direction: column;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 60px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #c6d46b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      font-size: 12px;
+      margin-top: 10px;
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="input-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="enter one user name" />
+      <button type="button" id="login-button">Login</button>
     </div>
-    <script>
-      var allUsers = []; // 所有用户
 
-      function GetAllUsers() {
-        // 获取所有用户
-        fetch(`http://127.0.0.1:7777/api/users`)
-          .then((response) => response.json())
-          .then((res) => {
-            allUsers = res;
-          })
-          .catch((error) => {
-            console.error("请求错误:", error);
-            document.getElementById("message").innerText =
-              "An error occurred, please try again later.";
-          });
-      }
+    <div class="message" id="message"></div>
+  </div>
+  <script>
+    var allUsers = []; // 所有用户
 
-      window.onload = () => {
-        // 页面加载完毕，执行这个函数，也就是第一执行的！！！
-        GetAllUsers();
-      };
-
-      const userNameDom = document.getElementById("username");
-      const messageDom = document.getElementById("message");
-
-      document.getElementById("login-button").addEventListener("click", () => {
-        // 点击登录按钮的处理
-
-        const username = userNameDom.value;
-        if (!username) {
-          // 没输入用户名，不让登录
-          alert("Please Enter Username!");
-          return;
-        }
-        let LoginStatus = false;
-        let currentUser = {};
-        allUsers.forEach((item) => {
-          // 遍历所有的用户，查看是否有这个用户
-          if (item.username === username) {
-            // 登录成功
-            LoginStatus = true;
-            currentUser = item;
-          }
+    function GetAllUsers() {
+      // 获取所有用户
+      fetch(`http://127.0.0.1:7777/api/users`)
+        .then((response) => response.json())
+        .then((res) => {
+          allUsers = res;
+        })
+        .catch((error) => {
+          console.error("请求错误:", error);
+          document.getElementById("message").innerText =
+            "An error occurred, please try again later.";
         });
+    }
 
-        if (LoginStatus === true) {
-          messageDom.style.color = "green";
-          messageDom.innerText =
-            "Login successful! Will automatically redirect to the homepage soon...";
-          window.location.href = `index.html?username=${encodeURIComponent(
-            currentUser.username
-          )}&name=${encodeURIComponent(currentUser.name)}`;
-        } else {
-          messageDom.innerText = "Username error, please modify and try again";
+    window.onload = () => {
+      // 页面加载完毕，执行这个函数，也就是第一执行的！！！
+      GetAllUsers();
+    };
+
+    const userNameDom = document.getElementById("username");
+    const messageDom = document.getElementById("message");
+
+    document.getElementById("login-button").addEventListener("click", () => {
+      // 点击登录按钮的处理
+
+      const username = userNameDom.value;
+      if (!username) {
+        // 没输入用户名，不让登录
+        alert("Please Enter Username!");
+        return;
+      }
+      let LoginStatus = false;
+      let currentUser = {};
+      allUsers.forEach((item) => {
+        // 遍历所有的用户，查看是否有这个用户
+        if (item.username === username) {
+          // 登录成功
+          LoginStatus = true;
+          currentUser = item;
         }
       });
-    </script>
-  </body>
+
+      if (LoginStatus === true) {
+        messageDom.style.color = "green";
+        messageDom.innerText =
+          "Login successful! Will automatically redirect to the homepage soon...";
+        window.location.href = `index.html?username=${encodeURIComponent(
+          currentUser.username
+        )}&name=${encodeURIComponent(currentUser.name)}`;
+      } else {
+        messageDom.innerText = "Username error, please modify and try again";
+      }
+    });
+  </script>
+</body>
+
 </html>
