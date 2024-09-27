@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        width: 500px;
+        background-color: #f2f2f2;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        text-align: right;
+      }
+
+      .threads {
+        margin-top: 20px;
+      }
+
+      .thread {
+        border-bottom: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 5px;
+        cursor: pointer;
+      }
+
+      .new-thread-btn {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+      ul {
+        max-height: 200px;
+        overflow: scroll;
+      }
+
+      li {
+        margin: 5px 2px;
+      }
+
+      .fade-in {
+        animation-name: fadeIn;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Logged in as Owen Dow</div>
+
+      <div class="threads">
+        <button class="new-thread-btn">New thread</button>
+        <div class="thread" onclick="showThread('1')">
+          Does anybody play an instrument?
+        </div>
+        <ul id="thread1" style="display: none">
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <li>test</li>
+          <input></input><button>Post</button>
+        </ul>
+        <div class="thread" onclick="showThread('2')">Hey everybody!</div>
+        <ul id="thread2" style="display: none"></ul>
+      </div>
+    </div>
+    <script>
+      function showThread(threadId) {
+        console.log(`thread${threadId}`);
+        const thread = document.getElementById(`thread${threadId}`);
+        if (thread.style.display === "none") {
+          thread.classList.add("fade-in");
+          thread.style.display = "";
+        } else {
+          thread.classList.remove("fade-in");
+          thread.style.display = "none";
+        }
+        thread.scrollTop = thread.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

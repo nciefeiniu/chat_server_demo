@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Page</title>
+    <style>
+      .progress-status {
+        background-color: #c6c4c4;
+        position: fixed;
+        left: 50%;
+        top: 33%;
+        width: 50%;
+        transform: translateX(-50%);
+      }
+
+      .progress-bar {
+        width: 1%;
+        height: 25px;
+        background-color: #b6913b;
+        text-align: center;
+        line-height: 25px;
+        color: black;
+      }
+
+      .login-box {
+        width: 457px;
+        height: 151px;
+        background-color: #cdd0d5;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+      }
+
+      .auth-container {
+        position: absolute;
+      }
+
+      .user-input input {
+        width: 180px;
+        height: 40px;
+        border-radius: 6px;
+      }
+
+      .user-input button {
+        cursor: pointer;
+        background-color: #b59243;
+        color: rgb(238, 235, 235);
+        border-radius: 6px;
+        font-size: 16px;
+        width: 90px;
+        height: 42px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="auth-container">
+      <div class="progress-status" id="progressStatus"></div>
+
+      <div class="login-box">
+        <span>Username</span>
+        <div class="user-input">
+          <input type="text" id="username" />
+          <button class="login-button" onclick="goToLogin()">Login</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const usernameEle = document.getElementById("username");
+
+      const goToLogin = () => {
+        // 点击登录按钮，去登录
+        const username = usernameEle.value;
+        if (!username) {
+          alert("Please input username");
+          return;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", `http://localhost:7777/api/users/${username}`, true);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              console.log(xhr);
+              const data = JSON.parse(xhr.responseText);
+              window.location.href = `./threads.html?username=${encodeURIComponent(
+                username
+              )}&name=${encodeURIComponent(data.name)}`;
+            } else {
+              alert("user does not exist");
+            }
+          }
+        };
+        xhr.send();
+      };
+    </script>
+  </body>
+</html>
