@@ -87,7 +87,9 @@
             if (xhr.status === 200) {
               console.log(xhr);
               const data = JSON.parse(xhr.responseText);
-              window.location.href = `./threads.html?username=${encodeURIComponent(
+              localStorage.setItem('username', username);  // 保存登录的username
+              localStorage.setItem('name', data.name);  // 保存登录的name,这里使用的是 localStorage
+              window.location.href = `./index.html?username=${encodeURIComponent(
                 username
               )}&name=${encodeURIComponent(data.name)}`;
             } else {
