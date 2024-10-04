@@ -178,8 +178,19 @@
       <ul id="thread2" style="display: none"></ul> -->
       </div>
 
-      <div style="text-align: center; margin: 20px 0;">
-        <button style="border: none; cursor: pointer;" onclick="window.history.back()">⬅🕖</button>
+      <div style="text-align: center; margin: 20px 0">
+        <button style="border: none; cursor: pointer" onclick="goForward()">
+          Forward
+        </button>
+        <button style="border: none; cursor: pointer" onclick="goBack()">
+          Back
+        </button>
+        <button
+          style="border: none; cursor: pointer"
+          onclick="window.location.replace('./login.html')"
+        >
+          Logout
+        </button>
       </div>
     </div>
 
@@ -188,11 +199,22 @@
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="create-thread-form">
           <label>Thread Title:</label>
-          <input type="text" id="threadTitle" class="create-thread-input" required /><br /><br />
+          <input
+            type="text"
+            id="threadTitle"
+            class="create-thread-input"
+            required
+          /><br /><br />
           <label>Icon:</label>
-          <input type="text" id="icon" class="create-thread-input" required /><br /><br />
+          <input
+            type="text"
+            id="icon"
+            class="create-thread-input"
+            required
+          /><br /><br />
           <label>Text:</label>
-          <textarea id="text" class="create-thread-input" required></textarea><br /><br />
+          <textarea id="text" class="create-thread-input" required></textarea
+          ><br /><br />
           <button type="submit">提交</button>
         </form>
       </div>
@@ -201,30 +223,53 @@
     <script>
       var IntervalPosts = {};
 
-      function showThread(threadId) {
+      function goForward() {
+        console.log("forward", history.length);
+        history.forward();
+      }
+
+      function goBack() {
+        console.log("back", history.length);
+        history.back();
+      }
+
+      function showThread(threadId, isPopstatus = false) {
+        hiddenAllThreads();
         console.log(`thread${threadId}`);
         const thread = document.getElementById(`thread${threadId}`);
-        if (thread.style.display === "none") {
-          // 显示这个thread
-          thread.classList.add("fade-in");
-          thread.style.display = "";
-          getPosts(threadId); // 去获取所有的posts
-          // 设置一个定时任务，每10秒钟去获取一次posts
-          const IntervalID = setInterval(() => {
-            getPosts(threadId);
-          }, 10000);
-          IntervalPosts[threadId] = IntervalID;
-        } else {
-          // 隐藏这个thread
+        // 显示这个thread
+        thread.classList.add("fade-in");
+        thread.style.display = "";
+        getPosts(threadId); // 去获取所有的posts
+        // 设置一个定时任务，每10秒钟去获取一次posts
+        const IntervalID = setInterval(() => {
+          getPosts(threadId);
+        }, 10000);
+        IntervalPosts[threadId] = IntervalID;
+        if (!isPopstatus) {
+          history.pushState(
+            { id: threadId },
+            `Thread ${threadId}`,
+            `?id=${threadId}`
+          );
+        }
+
+        thread.scrollTop = thread.scrollHeight;
+      }
+
+      function hiddenAllThreads() {
+        // 隐藏所有的thread
+        const threads = document.querySelectorAll(".thread-posts");
+        threads.forEach((thread) => {
           thread.classList.remove("fade-in");
           thread.style.display = "none";
+          const threadId = thread.getAttribute("ref");
           if (IntervalPosts[threadId]) {
             // 如果有定时任务，需要清除这个定时任务
             clearInterval(IntervalPosts[threadId]);
             IntervalPosts[threadId] = null;
           }
-        }
-        thread.scrollTop = thread.scrollHeight;
+        });
       }
 
       function renderThreads(data) {
@@ -238,6 +283,8 @@
           divDom.innerText = item.thread_title; // 设置innerText
 
           const ulDom = document.createElement("ul"); // 创建一个ul标签
+          ulDom.setAttribute("ref", item.id);
+          ulDom.setAttribute("class", "thread-posts");
           ulDom.setAttribute("id", `thread${item.id}`); // 设置id
           ulDom.style.display = "none"; // 隐藏
 
@@ -342,6 +389,7 @@
         name = undefined;
 
       window.onload = function () {
+        console.log("load");
         // 判断下是否登录了
         username = localStorage.getItem("username");
         name = localStorage.getItem("name");
@@ -407,6 +455,21 @@
             console.error("发生错误:", error.message);
             alert("发生错误，请重试！");
           });
+      });
+
+      // 监听 popstate 事件，用于处理后退按钮
+      window.addEventListener("popstate", (event) => {
+        console.log("event:", event);
+        hiddenAllThreads();
+        if (event.state) {
+          showThread(event.state.id, true);
+        }
+        // if (event.state) {
+        //   showThread(event.state.id);
+        // } else {
+        //   hiddenAllThreads();
+        //   // window.history.back();
+        // }
       });
     </script>
   </body>

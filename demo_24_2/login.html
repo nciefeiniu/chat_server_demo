@@ -72,6 +72,12 @@
     <script>
       const usernameEle = document.getElementById("username");
 
+      window.onload = () => {
+        // 页面加载完成
+        localStorage.removeItem('username');  // 去除登录
+        localStorage.removeItem('name');   // 去除登录
+      };
+
       const goToLogin = () => {
         // 点击登录按钮，去登录
         const username = usernameEle.value;
@@ -89,9 +95,7 @@
               const data = JSON.parse(xhr.responseText);
               localStorage.setItem('username', username);  // 保存登录的username
               localStorage.setItem('name', data.name);  // 保存登录的name,这里使用的是 localStorage
-              window.location.href = `./index.html?username=${encodeURIComponent(
-                username
-              )}&name=${encodeURIComponent(data.name)}`;
+              window.location.href = `./index.html`;
             } else {
               alert("user does not exist");
             }
