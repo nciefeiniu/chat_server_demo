@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index</title>
+  </head>
+  <body>
+    <script >
+      window.onload = function () {
+        // 页面加载完成
+        const username = sessionStorage.getItem('username');
+        const name = sessionStorage.getItem('name');
+        if (username && name) {
+          window.location.href = `./threads/index.html`;
+        } else {
+          window.location.replace = `./login/index.html`;
+        }
+      };
+    </script>
+  </body>
+</html>
