@@ -11,10 +11,13 @@
         // 页面加载完成
         const username = sessionStorage.getItem('username');
         const name = sessionStorage.getItem('name');
+        console.log(username, name)
         if (username && name) {
+          console.log('ok')
           window.location.href = `./threads/index.html`;
         } else {
-          window.location.replace = `./login/index.html`;
+          console.log('not ok')
+          window.location.href = `./login/index.html`;
         }
       };
     </script>
