@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Threads 页面</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="username">Logged in as <span id="current-user"></span></h1>
+      <div style="text-align: center;">
+          <button onclick="newThread()">New Thread</button>
+          <button onclick="goBack()">Back</button>
+          <button onclick="goForward()">Forward</button>
+      </div>
+  
+      <h2>Threads:</h2>
+      <div id="threads">
+          <!-- <div class="thread" onclick="togglePosts('thread1', 'Thread Title 1')">Thread Title 1</div>
+          <div class="posts" id="thread1">
+              <div class="post">Post 1 in Thread 1</div>
+              <div class="post">Post 2 in Thread 1</div>
+          </div> -->
+      </div>
+  </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

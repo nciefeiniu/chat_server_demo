@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Thread</title>
+    <link rel="stylesheet" href="./new_thread.css"></link>
+</head>
+<body>
+
+<div class="container">
+    <h1>Create New Thread</h1>
+    <form id="createThreadForm">
+        <label for="thread_title">thread_title:</label>
+        <input type="text" id="thread_title" required />
+
+        <label for="icon">icon:</label>
+        <input type="text" id="icon"  />
+
+        <label for="text">text:</label>
+        <textarea id="text" rows="5" required></textarea>
+
+        <button type="submit">submit</button>
+    </form>
+    <div class="message" id="message"></div>
+
+    <div class="go-back">◀Back</div>
+</div>
+
+<script src="./new_thread.js">
+    
+</script>
+
+</body>
+</html>
