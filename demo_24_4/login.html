@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .login-container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        text-align: center;
+      }
+      .login-container h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .input-group input {
+        width: 90%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .btn-login {
+        background-color: #5c67f2;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .btn-login:hover {
+        background-color: #4a54e1;
+      }
+      .message {
+        margin-top: 15px;
+        font-size: 14px;
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Welcome to log in</h1>
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+      <p id="message" class="message"></p>
+    </div>
+    <script src="public.js"></script>
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const messageElement = document.getElementById("message");
+
+          if (!username) {
+            messageElement.textContent = "Please enter a username.";
+            messageElement.style.color = "red";
+            return;
+          }
+
+          fetch("http://localhost:7777/api/users")
+            .then((response) => response.json())
+            .then((data) => {
+              const userExists = data.find(
+                (user) => user.username === username
+              );
+              if (userExists) {
+                messageElement.textContent =
+                  "Login successful! Will automatically redirect to the homepage soon...";
+                messageElement.style.color = "green";
+                setCookie("username", userExists.username, 60 * 60 * 24);
+                setCookie("name", userExists.name, 60 * 60 * 24);
+                setTimeout(() => {
+                  window.location.href = "/threads.html";
+                }, 2000);
+              } else {
+                messageElement.textContent =
+                  "The username does not exist, please try again.";
+                messageElement.style.color = "red";
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              messageElement.textContent =
+                "Request failed, please check network connection.";
+              messageElement.style.color = "red";
+            });
+        });
+    </script>
+  </body>
+</html>
