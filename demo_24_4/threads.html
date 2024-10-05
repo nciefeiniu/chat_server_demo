@@ -49,6 +49,59 @@
       .post-btn {
         margin-left: 2px;
       }
+
+      .popup {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .popup-content {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 300px;
+      }
+
+      .close {
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        font-size: 24px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      input[type="text"],
+      textarea {
+        margin-bottom: 10px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button[type="submit"] {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #0056b3;
+      }
     </style>
   </head>
   <body>
@@ -59,13 +112,38 @@
       </div>
       <button id="back-btn">Back</button>
       <button id="forward-btn">Forward</button>
+      <button id="new-thread-btn">New Thread</button>
       <button id="del-thread-btn" style="display: none">Del</button>
     </div>
+
+    <div id="popup" class="popup" style="display: none">
+      <div class="popup-content">
+        <span class="close">&times;</span>
+        <form id="thread-form">
+          <label for="thread_title">Thread Title:</label>
+          <input
+            type="text"
+            id="thread_title"
+            name="thread_title"
+            required
+          /><br /><br />
+
+          <label for="icon">Icon:</label>
+          <input type="text" id="icon" name="icon" required /><br /><br />
+
+          <label for="text">Text:</label>
+          <textarea id="text" name="text" required></textarea><br /><br />
+
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+
     <script src="./public.js"></script>
     <script>
       var currentThread = undefined;
       var currentInterval = undefined;
-      var deletedThreadsID = []
+      var deletedThreadsID = [];
 
       const threadList = document.getElementById("thread-list");
       const backBtn = document.getElementById("back-btn");
@@ -79,6 +157,7 @@
           currentInterval = undefined;
         }
         document.getElementById("del-thread-btn").style.display = "none";
+        document.getElementById("new-thread-btn").style.display = "inline";
         console.log("render threads");
         threadList.innerHTML = "";
         threads.forEach((thread, index) => {
@@ -121,7 +200,7 @@
         console.log(event.state);
         if (event.state && event.state.thread) {
           if (deletedThreadsID.includes(event.state.thread.id)) {
-            return
+            return;
           }
           showThreadPosts(event.state.thread, event.state.index, false);
         } else {
@@ -151,6 +230,7 @@
         if (thread.user === getCookie("username")) {
           document.getElementById("del-thread-btn").style.display = "inline";
         }
+        document.getElementById("new-thread-btn").style.display = "none";
       }
 
       function sendPost() {
@@ -196,6 +276,57 @@
             });
           }
         });
+    </script>
+    <script>
+      const openPopupBtn = document.getElementById("new-thread-btn");
+      const popup = document.getElementById("popup");
+      const close = document.getElementsByClassName("close")[0];
+      const threadForm = document.getElementById("thread-form");
+
+      openPopupBtn.onclick = function () {
+        popup.style.display = "flex";
+      };
+
+      close.onclick = function () {
+        popup.style.display = "none";
+      };
+
+      window.onclick = function (event) {
+        if (event.target === popup) {
+          popup.style.display = "none";
+        }
+      };
+
+      threadForm.onsubmit = function (event) {
+        event.preventDefault();
+        const threadTitle = document.getElementById("thread_title").value;
+        const icon = document.getElementById("icon").value;
+        const text = document.getElementById("text").value;
+
+        const formData = {
+          thread_title: threadTitle,
+          icon: icon,
+          text: text,
+          user: getCookie("username"),
+        };
+
+        fetch("http://127.0.0.1:7777/api/threads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+            popup.style.display = "none";
+            getAllThreads(renderThreads);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      };
     </script>
   </body>
 </html>
