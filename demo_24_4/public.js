@@ -19,7 +19,6 @@ function getCookie(name) {
   return null;
 }
 
-//删除cookie
 function delCookie(name) {
   var exp = new Date();
   exp.setTime(exp.getTime() - 1);
@@ -27,3 +26,23 @@ function delCookie(name) {
   if (cval != null)
     document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
 }
+
+function getAllThreads(callback) {
+  fetch("http://127.0.0.1:7777/api/threads")
+    .then((res) => res.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+
+function getPosts(thread, callback) {
+  fetch(`http://127.0.0.1:7777/api/threads/${thread.id}/posts`)
+    .then(res => res.json())
+    .then(data => {
+      console.log('data: ', data)
+      thread.posts = data
+      callback(thread);
+    });
+}
+
+

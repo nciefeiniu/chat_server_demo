@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Threads Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        width: 700px;
+        margin: auto;
+        text-align: center;
+        background-color: whitesmoke;
+        padding: 20px;
+      }
+
+      #thread-list {
+        margin-top: 20px;
+      }
+
+      .thread {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+      }
+
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .thread-title-span {
+        color: skyblue;
+      }
+
+      .post {
+        padding: 10px;
+      }
+
+      .post-input {
+        line-height: 35px;
+      }
+      .post-btn {
+        margin-left: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Threads</h1>
+      <div id="thread-list">
+        <!-- Threads will be listed here -->
+      </div>
+      <button id="back-btn">Back</button>
+      <button id="forward-btn">Forward</button>
+    </div>
+    <script src="./public.js"></script>
+    <script>
+      var currentThread = undefined;
+      var currentInterval = undefined;
+
+      const threadList = document.getElementById("thread-list");
+      const backBtn = document.getElementById("back-btn");
+      const forwardBtn = document.getElementById("forward-btn");
+      let historyStack = [];
+      let currentThreadIndex = -1;
+
+      function renderThreads(threads) {
+        if (currentInterval) {
+          clearInterval(currentInterval);
+          currentInterval = undefined;
+        }
+
+        console.log("render threads");
+        threadList.innerHTML = "";
+        threads.forEach((thread, index) => {
+          const threadElem = document.createElement("div");
+          threadElem.className = "thread";
+          threadElem.textContent = thread.thread_title;
+          threadElem.onclick = function () {
+            showThreadPosts(thread, index);
+          };
+          threadList.appendChild(threadElem);
+        });
+      }
+
+      function showThreadPosts(thread, index, add2History = true) {
+        currentThread = thread;
+        currentThreadIndex = index;
+        if (add2History) {
+          window.history.pushState(
+            { thread, index },
+            thread.thread_title,
+            `threads.html#${index}`
+          );
+        }
+
+        getPosts(thread, renderPosts);
+        currentInterval = setInterval(() => {
+          getPosts(thread, renderPosts);
+        }, 10000);
+      }
+
+      backBtn.addEventListener("click", function () {
+        window.history.back();
+      });
+
+      forwardBtn.addEventListener("click", function () {
+        window.history.forward();
+      });
+
+      window.addEventListener("popstate", function (event) {
+        console.log(event.state);
+        if (event.state && event.state.thread) {
+          showThreadPosts(event.state.thread, event.state.index, false);
+        } else {
+          currentThreadID = undefined;
+          getAllThreads(renderThreads);
+        }
+      });
+
+      getAllThreads(renderThreads);
+
+      function renderPosts(thread) {
+        console.log("thread:", thread);
+        threadList.innerHTML = "";
+        const postsContainer = document.createElement("div");
+        const postsTitle = document.createElement("h2");
+        postsTitle.innerHTML = `Posts in <span class="thread-title-span">${thread.thread_title}</span>`;
+        postsContainer.appendChild(postsTitle);
+        thread.posts.forEach((post) => {
+          const postElem = document.createElement("div");
+          postElem.className = "post";
+          postElem.textContent = post.text + " - " + post.name;
+          postsContainer.appendChild(postElem);
+        });
+        threadList.appendChild(postsContainer);
+        threadList.innerHTML +=
+          '<input class="post-input"></input><button class="post-btn" onclick="sendPost()">Post</button>';
+      }
+
+      function sendPost() {
+        const postText = document.querySelector(".post-input").value;
+        if (!postText) {
+          console.log("No post text");
+          return;
+        }
+        fetch(`http://localhost:7777/api/threads/${currentThread.id}/posts`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            text: postText,
+            user: getCookie("username"),
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Post created:", data);
+            getPosts(currentThread, renderPosts);
+          });
+      }
+    </script>
+  </body>
+</html>
