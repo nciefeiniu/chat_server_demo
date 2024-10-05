@@ -59,11 +59,13 @@
       </div>
       <button id="back-btn">Back</button>
       <button id="forward-btn">Forward</button>
+      <button id="del-thread-btn" style="display: none">Del</button>
     </div>
     <script src="./public.js"></script>
     <script>
       var currentThread = undefined;
       var currentInterval = undefined;
+      var deletedThreadsID = []
 
       const threadList = document.getElementById("thread-list");
       const backBtn = document.getElementById("back-btn");
@@ -76,7 +78,7 @@
           clearInterval(currentInterval);
           currentInterval = undefined;
         }
-
+        document.getElementById("del-thread-btn").style.display = "none";
         console.log("render threads");
         threadList.innerHTML = "";
         threads.forEach((thread, index) => {
@@ -118,6 +120,9 @@
       window.addEventListener("popstate", function (event) {
         console.log(event.state);
         if (event.state && event.state.thread) {
+          if (deletedThreadsID.includes(event.state.thread.id)) {
+            return
+          }
           showThreadPosts(event.state.thread, event.state.index, false);
         } else {
           currentThreadID = undefined;
@@ -143,6 +148,9 @@
         threadList.appendChild(postsContainer);
         threadList.innerHTML +=
           '<input class="post-input"></input><button class="post-btn" onclick="sendPost()">Post</button>';
+        if (thread.user === getCookie("username")) {
+          document.getElementById("del-thread-btn").style.display = "inline";
+        }
       }
 
       function sendPost() {
@@ -167,6 +175,27 @@
             getPosts(currentThread, renderPosts);
           });
       }
+
+      document
+        .getElementById("del-thread-btn")
+        .addEventListener("click", () => {
+          if (confirm("Are you sure you want to delete this thread?")) {
+            fetch(`http://127.0.0.1:7777/api/threads/${currentThread.id}`, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              method: "DELETE",
+              body: JSON.stringify({
+                user: getCookie("username"),
+              }),
+            }).then((response) => {
+              if (response.ok) {
+                deletedThreadsID.push(currentThread.id);
+                window.history.back();
+              }
+            });
+          }
+        });
     </script>
   </body>
 </html>

@@ -42,7 +42,7 @@ function getPosts(thread, callback) {
       console.log('data: ', data)
       thread.posts = data
       callback(thread);
-    });
+    }).catch(err => console.log(err));
 }
 
 
