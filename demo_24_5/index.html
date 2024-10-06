@@ -57,7 +57,7 @@
         cursor: pointer;
       }
       .nav-buttons {
-        margin-top: 10px;
+        margin-top: 20px;
         display: flex;
         justify-content: space-between;
       }
@@ -69,11 +69,57 @@
         line-height: 24px;
         border-radius: 4px;
       }
+
+      .del-btn {
+        line-height: 8px;
+        margin-left: 10px;
+        background-color: red;
+        border: none;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      #openModalBtn {
+        margin: 10px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="header">Logged in as <span id="logged-name"></span></div>
+      <div>
+        <button id="openModalBtn">New Thread</button>
+      </div>
       <div id="threads"></div>
 
       <!-- <div class="reply-box">
@@ -84,6 +130,30 @@
       <div class="nav-buttons">
         <button onclick="goBack()">Back</button>
         <button onclick="goForward()">Forward</button>
+      </div>
+    </div>
+
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>New Thread</h2>
+        <form id="myForm">
+          <label for="thread_title">Thread Title:</label><br />
+          <input
+            type="text"
+            id="thread_title"
+            name="thread_title"
+            required
+          /><br /><br />
+
+          <label for="icon">Icon:</label><br />
+          <input type="text" id="icon" name="icon" required /><br /><br />
+
+          <label for="text">Text:</label><br />
+          <input type="text" id="text" name="text" required /><br /><br />
+
+          <input type="submit" value="Submit" />
+        </form>
       </div>
     </div>
 
@@ -103,6 +173,22 @@
         allThread();
       };
 
+      function delThread(threadId) {
+        fetch(`http://localhost:7777/api/threads/${threadId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: username,
+          }),
+        }).then((res) => {
+          if (res.ok) {
+            allThread();
+          }
+        });
+      }
+
       function allThread() {
         const threadsContainer = document.getElementById("threads");
         threadsContainer.innerHTML = "";
@@ -116,6 +202,16 @@
               threadTitle.classList.add("thread-title");
               threadTitle.setAttribute("onclick", `togglePosts(${thread.id})`);
               threadTitle.textContent = thread.thread_title;
+
+              // del
+              if (thread.user === username) {
+                const del = document.createElement("button");
+                del.textContent = "del";
+                del.classList.add("del-btn");
+                del.setAttribute("onclick", `delThread(${thread.id})`);
+                threadTitle.appendChild(del);
+              }
+
               const postContainer = document.createElement("div");
               postContainer.id = `post-${thread.id}`;
               postContainer.classList.add("post");
@@ -218,6 +314,62 @@
       function goForward() {
         window.history.forward();
       }
+
+      var modal = document.getElementById("myModal");
+      var btn = document.getElementById("openModalBtn");
+      var span = document.getElementsByClassName("close")[0];
+
+      btn.onclick = function () {
+        modal.style.display = "block";
+      };
+
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
+
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+
+      // 表单提交处理
+      document
+        .getElementById("myForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // 阻止表单默认提交行为
+
+          // 获取表单数据
+          var threadTitle = document.getElementById("thread_title").value;
+          var icon = document.getElementById("icon").value;
+          var text = document.getElementById("text").value;
+
+          // 构建JSON数据
+          var data = {
+            thread_title: threadTitle,
+            icon: icon,
+            text: text,
+            user: username,
+          };
+
+          // 发送POST请求
+          fetch(`http://localhost:7777/api/threads`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Success:", data);
+              modal.style.display = "none"; // 关闭模态框
+              allThread();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
     </script>
   </body>
 </html>
