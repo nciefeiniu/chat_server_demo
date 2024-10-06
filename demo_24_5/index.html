@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Threads</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f8f8f8;
+      }
+      .container {
+        width: 500px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        background-color: #f0f0f0;
+      }
+      .header {
+        text-align: right;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .thread {
+        margin-bottom: 10px;
+      }
+      .thread-title {
+        cursor: pointer;
+        color: blue;
+        text-decoration: underline;
+        margin-bottom: 5px;
+      }
+      .post {
+        display: none;
+        border: 1px solid #000;
+        padding: 5px;
+        background-color: #fff;
+        margin-top: 5px;
+        max-height: 300px;
+        overflow: auto;
+      }
+      .reply-box {
+        display: flex;
+        margin-top: 10px;
+      }
+      .reply-box input[type="text"] {
+        flex: 1;
+        padding: 5px;
+      }
+      .reply-box button {
+        background-color: #d4af37;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .nav-buttons {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+      }
+      button {
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .new-post-input {
+        line-height: 24px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Logged in as <span id="logged-name"></span></div>
+      <div id="threads"></div>
+
+      <!-- <div class="reply-box">
+            <input type="text" placeholder="My reply">
+            <button>Post</button>
+        </div> -->
+
+      <div class="nav-buttons">
+        <button onclick="goBack()">Back</button>
+        <button onclick="goForward()">Forward</button>
+      </div>
+    </div>
+
+    <script>
+      var username,
+        name = undefined;
+      var existsAutoGetPost = undefined;
+
+      window.onload = function () {
+        username = sessionStorage.getItem("username");
+        name = sessionStorage.getItem("name");
+        if (!username || !name) {
+          window.location.href = "login.html";
+          return;
+        }
+        document.getElementById("logged-name").textContent = name;
+        allThread();
+      };
+
+      function allThread() {
+        const threadsContainer = document.getElementById("threads");
+        threadsContainer.innerHTML = "";
+        fetch("http://localhost:7777/api/threads")
+          .then((res) => res.json())
+          .then((data) => {
+            data.forEach((thread) => {
+              const threadContainer = document.createElement("div");
+              threadContainer.classList.add("thread");
+              const threadTitle = document.createElement("div");
+              threadTitle.classList.add("thread-title");
+              threadTitle.setAttribute("onclick", `togglePosts(${thread.id})`);
+              threadTitle.textContent = thread.thread_title;
+              const postContainer = document.createElement("div");
+              postContainer.id = `post-${thread.id}`;
+              postContainer.classList.add("post");
+              threadContainer.appendChild(threadTitle);
+              threadContainer.appendChild(postContainer);
+              threadsContainer.appendChild(threadContainer);
+            });
+          });
+      }
+
+      function hiddenAllPosts() {
+        const threads = document.querySelectorAll(".post");
+        threads.forEach((post) => (post.style.display = "none"));
+      }
+
+      function showPosts(threadId) {
+        fetch(`http://localhost:7777/api/threads/${threadId}/posts`)
+          .then((res) => res.json())
+          .then((data) => {
+            const post = document.getElementById(`post-${threadId}`);
+            post.innerHTML = "";
+            data.forEach((item) => {
+              post.innerText += `${item.text}`;
+              const br = document.createElement("br");
+              post.appendChild(br);
+              post.innerText += `- ${item.name}`;
+              post.appendChild(br);
+              post.innerText += "";
+              post.appendChild(br);
+            });
+            // new Post btn
+            const newPost = document.createElement("input");
+            newPost.id = `input-${threadId}`;
+            newPost.classList.add("new-post-input");
+            const postButton = document.createElement("button");
+            postButton.textContent = "Post";
+            postButton.setAttribute("onclick", `sendNewPost(${threadId})`);
+            post.appendChild(newPost);
+            post.appendChild(postButton);
+            post.scrollTo(0, post.scrollHeight);
+          });
+      }
+
+      function togglePosts(threadId) {
+        hiddenAllPosts();
+        const post = document.getElementById(`post-${threadId}`);
+        post.style.display = post.style.display === "block" ? "none" : "block";
+        window.history.pushState(
+          { thread: threadId },
+          `Thread ${threadId}`,
+          `#thread${threadId}`
+        );
+        showPosts(threadId);
+        autoLoadPosts(threadId); // 自动加载post
+      }
+
+      function sendNewPost(threadId) {
+        const newPost = document.getElementById(`input-${threadId}`).value;
+        if (!newPost) {
+          return;
+        }
+        fetch(`http://localhost:7777/api/threads/${threadId}/posts`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            text: newPost,
+            user: username,
+          }),
+        }).then((res) => {
+          if (res.ok) {
+            showPosts(threadId);
+          }
+        });
+      }
+
+      function autoLoadPosts(threadId) {
+        if (existsAutoGetPost) {
+          clearInterval(existsAutoGetPost);
+        }
+        existsAutoGetPost = setInterval(() => {
+          showPosts(threadId);
+        }, 10000);
+      }
+
+      window.onpopstate = function (event) {
+        hiddenAllPosts();
+        if (event.state && event.state.thread) {
+          document.getElementById(`post-${event.state.thread}`).style.display =
+            "block";
+        }
+        autoLoadPosts(event.state.thread);
+      };
+
+      function goBack() {
+        window.history.back();
+      }
+
+      function goForward() {
+        window.history.forward();
+      }
+    </script>
+  </body>
+</html>
