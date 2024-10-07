@@ -1,0 +1,139 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  width: 400px;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-bottom: 1px solid #ced4da;
+  text-align: right;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.threads {
+  padding: 15px;
+}
+
+.thread-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.thread-title:hover {
+  text-decoration: underline;
+}
+
+.posts {
+  display: none; /* Initially hide posts */
+  margin-top: 10px;
+  max-height: 350px;
+  overflow: auto;
+}
+
+.thread-message {
+  margin-bottom: 10px;
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 5px;
+  color: #495057;
+}
+
+.username {
+  display: block;
+  font-weight: bold;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.reply-box {
+  display: flex;
+  margin-top: 10px;
+}
+
+.reply-box input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.reply-box button {
+  margin-left: 5px;
+  padding: 8px 15px;
+  background-color: #d1b17f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.reply-box button:hover {
+  background-color: #b08a5f;
+}
+
+.footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.navigation-buttons button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.navigation-buttons button:hover {
+  background-color: #0056b3;
+}
+
+.del-thread-btn {
+  cursor: pointer;
+  margin-left: 10px;
+}
