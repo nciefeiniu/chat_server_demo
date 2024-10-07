@@ -4,22 +4,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forum</title>
+  <title>Chat Server</title>
   <link rel="stylesheet" href="./index.css">
   </link>
 </head>
 
 <body>
   <div class="container">
-    <div class="header">
+    <div class="container-thread">
+      <div class="header">
+      </div>
+      <div>
+        <button onclick="displayCreateThread()">New Thread</button>
+      </div>
+      <div class="threads" id="threads-container">
+      </div>
+      <div class="navigation-buttons">
+        <button id="back-button">Back</button>
+        <button id="forward-button">Forward</button>
+      </div>
+    </div>
+    <div class="container-new-thread">
+      <form id="postForm">
+        <label for="postTitle">Title:</label>
+        <input type="text" id="postTitle" name="postTitle" required>
+        <label for="postIcon">Icon:</label>
+        <input type="text" id="postIcon" name="postIcon" required>
+        <label for="postText">Text:</label>
+        <textarea id="postText" name="postText" rows="3" required></textarea>
+    </form>
+    <button onclick="createThread()">Submit</button>
+    <button onclick="displayThreadList()">Back</button>
 
-    </div>
-    <div class="threads" id="threads-container">
-      <!-- Threads will be dynamically loaded here -->
-    </div>
-    <div class="navigation-buttons">
-      <button id="back-button">Back</button>
-      <button id="forward-button">Forward</button>
     </div>
   </div>
 
@@ -29,7 +45,45 @@
     let name = undefined
     let autoLoadPosts = undefined;
 
+    function displayCreateThread(){
+      document.querySelector('.container-new-thread').style.display = 'block';
+      document.querySelector('.container-thread').style.display = 'none';
+    }
 
+    function displayThreadList(){
+      document.querySelector('.container-new-thread').style.display = 'none';
+      document.querySelector('.container-thread').style.display = 'block';
+    }
+
+    async function createThread() {
+      const formData = {
+        thread_title: document.getElementById('postTitle').value,
+            icon: document.getElementById('postIcon').value,
+            text: document.getElementById('postText').value,
+            user: username
+        };
+
+        fetch('http://localhost:7777/api/threads', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Post submitted successfully!');
+                displayThreadList();
+                fetchThreads()
+            } else {
+                alert('Failed to submit post.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the post.');
+        });
+    }
 
     function hiddenAllPosts() {
       const postsDivs = document.querySelectorAll('.posts');
@@ -78,6 +132,7 @@
     // Display the threads in the HTML
     function displayThreads(threads) {
       const container = document.getElementById('threads-container');
+      container.innerHTML = ''
       threads.forEach(thread => {
         const threadDiv = document.createElement('div');
         threadDiv.classList.add('thread-title');
@@ -215,6 +270,12 @@
     window.onload = () => {
       username = localStorage.getItem("username")
       name = localStorage.getItem("name")
+
+      if (!username || !name) {
+        window.location.href = "./login.html"
+        return
+      }
+
       document.querySelector('.header').textContent = `Logged in as ${name}`
       fetchThreads()
     }

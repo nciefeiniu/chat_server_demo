@@ -119,7 +119,7 @@ body {
   margin-top: 10px;
 }
 
-.navigation-buttons button {
+button {
   padding: 8px 15px;
   background-color: #007bff;
   color: #fff;
@@ -129,11 +129,34 @@ body {
   font-size: 14px;
 }
 
-.navigation-buttons button:hover {
+button:hover {
   background-color: #0056b3;
 }
 
 .del-thread-btn {
   cursor: pointer;
   margin-left: 10px;
+}
+
+
+.container-new-thread {
+  display: none;
+}
+
+
+label {
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+#postForm {
+  padding: 10px;
 }
