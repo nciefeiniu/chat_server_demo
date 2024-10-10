@@ -6,17 +6,8 @@
   </head>
   <body>
     <script src="public.js"></script>
-    <script>
-      window.onload = () => {
-        const username = getCookie("username");
-        const name = getCookie("name");
-
-        if (username && name) {
-          window.location.href = "./threads.html";
-        } else {
-          window.location.href = "./login.html";
-        }
-      };
+    <script src="./index.js">
+      
     </script>
   </body>
 </html>
