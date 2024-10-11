@@ -14,11 +14,11 @@ function showThread(threadId, isPopstatus = false) {
   hiddenAllThreads();
   console.log(`thread${threadId}`);
   const thread = document.getElementById(`thread${threadId}`);
-  // 显示这个thread
+  // Show this thread
   thread.classList.add("fade-in");
   thread.style.display = "";
-  getPosts(threadId); // 去获取所有的posts
-  // 设置一个定时任务，每10秒钟去获取一次posts
+  getPosts(threadId); // Go get all the posts
+  // Set a timed task to retrieve posts every 10 seconds
   const IntervalID = setInterval(() => {
     getPosts(threadId);
   }, 10000);
@@ -35,14 +35,14 @@ function showThread(threadId, isPopstatus = false) {
 }
 
 function hiddenAllThreads() {
-  // 隐藏所有的thread
+  // Hide all threads
   const threads = document.querySelectorAll(".thread-posts");
   threads.forEach((thread) => {
     thread.classList.remove("fade-in");
     thread.style.display = "none";
     const threadId = thread.getAttribute("ref");
     if (IntervalPosts[threadId]) {
-      // 如果有定时任务，需要清除这个定时任务
+      // If there is a scheduled task, it needs to be cleared
       clearInterval(IntervalPosts[threadId]);
       IntervalPosts[threadId] = null;
     }
@@ -50,30 +50,29 @@ function hiddenAllThreads() {
 }
 
 function renderThreads(data) {
-  // 渲染所有threads到页面上
+  // Render all threads onto the page
   const threadsContainer = document.querySelector(".threads");
   threadsContainer.innerHTML = "";
   data.forEach((item) => {
-    const divDom = document.createElement("div"); // 创建一个div标签
-    divDom.setAttribute("class", "thread"); // 设置class
-    divDom.setAttribute("onclick", `showThread('${item.id}')`); // 点击事件
-    divDom.innerText = item.thread_title; // 设置innerText
+    const divDom = document.createElement("div"); // Create a div tag
+    divDom.setAttribute("class", "thread"); // Set class
+    divDom.setAttribute("onclick", `showThread('${item.id}')`); // Click Event
+    divDom.innerText = item.thread_title; // Set innerText
 
-    const ulDom = document.createElement("ul"); // 创建一个ul标签
+    const ulDom = document.createElement("ul"); // Create an ul tag
     ulDom.setAttribute("ref", item.id);
     ulDom.setAttribute("class", "thread-posts");
-    ulDom.setAttribute("id", `thread${item.id}`); // 设置id
-    ulDom.style.display = "none"; // 隐藏
+    ulDom.setAttribute("id", `thread${item.id}`); // Set ID
+    ulDom.style.display = "none"; // hide
 
     if (item.user === username) {
       console.log("can del");
-      // 如果这个thread的user和当前登录的user一致，则显示删除按钮
+      // If the user of this thread matches the currently logged in user, a delete button will be displayed
       const delDom = document.createElement("button");
       delDom.innerText = "Del";
       delDom.setAttribute("class", "del-btn");
       delDom.onclick = () => {
-        // 点击事件
-        // 删除这个thread
+        // Delete this thread
         fetch(`http://localhost:7777/api/threads/${item.id}`, {
           method: "DELETE",
           headers: {
@@ -84,10 +83,10 @@ function renderThreads(data) {
           }),
         }).then((res) => {
           if (res.ok) {
-            // 删除成功
-            allThreads(renderThreads); // 重新获取所有的Threads
+            // Delete successfully
+            allThreads(renderThreads); // Retrieve all threads again
             if (IntervalPosts[item.id]) {
-              // 如果有定时任务，需要清除
+              // If there are scheduled tasks that need to be cleared
               clearInterval(IntervalPosts[item.id]);
             }
           }
@@ -95,25 +94,25 @@ function renderThreads(data) {
       };
       divDom.appendChild(delDom);
     }
-    threadsContainer.appendChild(divDom); // 添加到threadsContainer
-    threadsContainer.appendChild(ulDom); // 添加到threadsContainer
+    threadsContainer.appendChild(divDom); // Add to ThreadContainer
+    threadsContainer.appendChild(ulDom); // Add to ThreadContainer
   });
 }
 
 const allThreads = (callback) => {
-  // 获取所有的thread
+  // Get all threads
   fetch(`http://localhost:7777/api/threads`)
     .then((data) => {
       return data.json();
     })
     .then((data) => {
-      // 获取成功，交给callback进行渲染到页面上
+      // Successfully obtained, handed over to callback for rendering on the page
       callback(data);
     });
 };
 
 function renderPosts(threadID, threadsData) {
-  // 渲染某thread的所有posts到页面显示
+  // Render all posts of a certain thread to the page for display
   const ulDom = document.getElementById(`thread${threadID}`);
   ulDom.innerHTML = "";
   threadsData.forEach((item) => {
@@ -127,7 +126,7 @@ function renderPosts(threadID, threadsData) {
   buttonDom.innerText = "Post";
   buttonDom.setAttribute("class", "new-post-btn");
   buttonDom.onclick = () => {
-    // 点击事件
+    // Click Event
     const text = inputDom.value;
     fetch(`http://localhost:7777/api/threads/${threadID}/posts`, {
       method: "POST",
@@ -151,7 +150,7 @@ function renderPosts(threadID, threadsData) {
 }
 
 function getPosts(threadID) {
-  // 获取某thread的所有posts
+  // Retrieve all posts of a certain thread
   fetch(`http://localhost:7777/api/threads/${threadID}/posts`)
     .then((data) => {
       return data.json();
@@ -160,21 +159,24 @@ function getPosts(threadID) {
       renderPosts(threadID, data);
     });
 }
-var username,
-  name = undefined;
+var username = undefined;
+var name = undefined;
 
 window.onload = function () {
   console.log("load");
-  // 判断下是否登录了
-  username = localStorage.getItem("username");
-  name = localStorage.getItem("name");
-  if (!username || !name) {
-    // 未登录，跳转到登录页面
+  // Check if you have logged in
+  const urlParams = new URLSearchParams(window.location.search);
+  var userInfo = urlParams.get("userinfo");
+  if (!userInfo) {
+    // Not logged in, redirected to login page
     window.location.href = "./login.html";
     return;
   }
+  userInfo = JSON.parse(userInfo);
+  username = userInfo.username;
+  name = userInfo.name;
   document.querySelector(".logged-name").innerText = name;
-  allThreads(renderThreads); // 渲染所有threads
+  allThreads(renderThreads); // Render all threads
 };
 var modal = document.getElementById("myModal");
 var form = document.getElementById("create-thread-form");
@@ -186,14 +188,12 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-// 点击模态框外部区域也可关闭模态框
 window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = "none";
   }
 };
 
-// 点击表单的提交按钮，触发这个函数
 form.addEventListener("submit", function (event) {
   event.preventDefault();
 
@@ -219,28 +219,21 @@ form.addEventListener("submit", function (event) {
       if (response.ok) {
         alert("Successfully created thread");
         closeModal();
-        allThreads(renderThreads); // 重新获取所有的Threads
+        allThreads(renderThreads); // Retrieve all threads again
       } else {
-        throw new Error("发生错误，请重试！");
+        throw new Error("An error occurred, please try again!");
       }
     })
     .catch((error) => {
-      console.error("发生错误:", error.message);
-      alert("发生错误，请重试！");
+      console.error("Error occurred:", error.message);
+      alert("An error occurred, please try again!");
     });
 });
 
-// 监听 popstate 事件，用于处理后退按钮
 window.addEventListener("popstate", (event) => {
   console.log("event:", event);
   hiddenAllThreads();
   if (event.state) {
     showThread(event.state.id, true);
   }
-  // if (event.state) {
-  //   showThread(event.state.id);
-  // } else {
-  //   hiddenAllThreads();
-  //   // window.history.back();
-  // }
 });
