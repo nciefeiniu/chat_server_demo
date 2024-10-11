@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threads Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .threadBox {
+            background-color: #fff;
+            border-radius: 5px;
+            margin: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .threadTitle {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .postsBox {
+            display: none;
+            margin-left: 20px;
+            padding: 10px;
+        }
+
+        .postInline {
+            border-bottom: 1px solid #ccc;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Logged in as xxx</h1>
+    <div class="threadBox" onclick="togglePosts('thread1')">
+        <div class="threadTitle">Thread 1</div>
+        <div class="postsBox" id="thread1">
+            <div class="postInline">Post 1</div>
+            <div class="postInline">Post 2</div>
+            <div class="postInline">Post 3</div>
+        </div>
+    </div>
+    
+
+    <script>
+        function togglePosts(threadId) {
+            var posts = document.getElementById(threadId);
+            if (posts.style.display === 'none') {
+                posts.style.display = 'block';
+            } else {
+                posts.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
