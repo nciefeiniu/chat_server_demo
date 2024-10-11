@@ -95,6 +95,8 @@
             threadPostsBox.innerHTML += `<input class="inputField" id="threadNewPostInput-${threadId}" onclick="event.stopPropagation();"></input><button onclick="threadNewPostHandle()">Send</button>`;
 
             threadPostsBox.style.display = "block";
+          }).catch(err => {
+            console.log('This thread is not available')
           });
 
         if (addIn === false) {
