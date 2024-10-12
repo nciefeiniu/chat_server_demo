@@ -12,21 +12,45 @@
       <div class="btn-container">
         <span id="btn-back">⏪</span>
         <span id="btn-go">⏩</span>
+        <span><button id="openCreateNewThread">New</button></span>
       </div>
       <div id="threadsList"></div>
+    </div>
+
+    <div id="overlay"></div>
+    <div id="popup">
+      <span class="close-btn" onclick="closePopup()">&times;</span>
+      <h2>Thread Post Form</h2>
+      <form id="postForm">
+        <label for="threadTitle">Thread Title:</label>
+        <input
+          type="text"
+          id="threadTitle"
+          name="threadTitle"
+          required
+        /><br /><br />
+        <label for="icon">Icon:</label>
+        <input type="text" id="icon" name="icon" required /><br /><br />
+        <label for="text">Text:</label>
+        <textarea id="text" name="text" required></textarea><br /><br />
+        <button type="submit">Submit</button>
+      </form>
     </div>
 
     <script>
       var urlParamsSearchHandle = new URLSearchParams(window.location.search);
       var name = urlParamsSearchHandle.get("name");
-      var username = urlParamsSearchHandle.get("username");
+      var user = urlParamsSearchHandle.get("username");
       var intervalId = null;
+      var isPopupOpen = false;
 
-      if (!username) {
+      const threadsList = document.getElementById("threadsList");
+
+      if (!user) {
         window.location.href = "./login.html";
       } else {
         name = decodeURIComponent(name);
-        username = decodeURIComponent(username);
+        user = decodeURIComponent(user);
         document.querySelector(
           ".thread-header"
         ).textContent = `Logged in as ${name}`;
@@ -68,52 +92,55 @@
           });
       }
 
-      fetch("http://127.0.0.1:7777/api/threads")
-        .then((response) => response.json())
-        .then((threads) => {
-          const threadsList = document.getElementById("threadsList");
-          threads.forEach((thread) => {
-            const threadElement = document.createElement("div");
-            threadElement.className = "thread-item can-click";
-            threadElement.id = "thread-" + thread.id;
-            threadElement.innerHTML = `
+      function createThreadElement(thread) {
+        const threadElement = document.createElement("div");
+        threadElement.className = "thread-item can-click";
+        threadElement.id = "thread-" + thread.id;
+        threadElement.innerHTML = `
               <span class="thread-icon can-click">${thread.icon}</span>
               <span class="can-click">${thread.thread_title}</span>
             `;
-            threadElement.addEventListener("click", (event) => {
-              console.log(event.target.className);
-              if (event.target.className.indexOf("can-click") < 0) {
-                return;
-              }
+        threadElement.addEventListener("click", (event) => {
+          console.log(event.target.className);
+          if (event.target.className.indexOf("can-click") < 0) {
+            return;
+          }
 
-              if (document.querySelector(".thread-posts-" + thread.id)) {
-                return;
-              }
+          if (document.querySelector(".thread-posts-" + thread.id)) {
+            return;
+          }
 
-              window.history.pushState(
-                { showThread: thread },
-                "",
-                "thread_posts?id=" + thread.id
-              );
+          window.history.pushState(
+            { showThread: thread },
+            "",
+            "thread_posts?id=" + thread.id
+          );
 
-              if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-              }
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
 
-              document
-                .querySelectorAll(".posts-container")
-                .forEach((postContainer) => {
-                  postContainer.remove();
-                });
-
-              threadClickGetPostsHandle(thread, threadElement);
-
-              intervalId = setInterval(() => {
-                threadClickGetPostsHandle(thread, threadElement);
-              }, 10000);
+          document
+            .querySelectorAll(".posts-container")
+            .forEach((postContainer) => {
+              postContainer.remove();
             });
-            threadsList.appendChild(threadElement);
+
+          threadClickGetPostsHandle(thread, threadElement);
+
+          intervalId = setInterval(() => {
+            threadClickGetPostsHandle(thread, threadElement);
+          }, 10000);
+        });
+        threadsList.appendChild(threadElement);
+      }
+
+      fetch("http://127.0.0.1:7777/api/threads")
+        .then((response) => response.json())
+        .then((threads) => {
+          threads.forEach((thread) => {
+            createThreadElement(thread);
           });
         })
         .catch((error) => console.error("Error fetching threads:", error));
@@ -134,7 +161,7 @@
           },
           body: JSON.stringify({
             text: newPostText,
-            user: username,
+            user: user,
           }),
         })
           .then((response) => response.json())
@@ -183,6 +210,57 @@
             });
         }
       };
+
+      function openPopup() {
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("overlay").style.display = "block";
+        isPopupOpen = true;
+      }
+
+      function closePopup() {
+        document.getElementById("popup").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+        isPopupOpen = false;
+      }
+
+      document
+        .getElementById("openCreateNewThread")
+        .addEventListener("click", openPopup);
+
+      document
+        .getElementById("postForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const thread_title = document.querySelector("#threadTitle").value;
+          const icon = document.querySelector("#icon").value;
+          const text = document.querySelector("#text").value;
+
+          if (!threadTitle || !icon || !text) return;
+
+          const postData = JSON.stringify({
+            thread_title,
+            icon,
+            text,
+            user,
+          });
+
+          fetch(`http://127.0.0.1:7777/api/threads`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: postData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Success:", data);
+              closePopup();
+              createThreadElement(data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
     </script>
   </body>
 </html>
