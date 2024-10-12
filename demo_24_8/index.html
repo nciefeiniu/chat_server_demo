@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thread List Page</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="thread-header"></div>
+    <div class="threads-container">
+      <div id="threadsList"></div>
+    </div>
+
+    <script>
+      var urlParamsSearchHandle = new URLSearchParams(window.location.search);
+      var name = urlParamsSearchHandle.get("name");
+      var username = urlParamsSearchHandle.get("username");
+      var intervalId = null;
+
+      if (!username) {
+        window.location.href = "./login.html";
+      } else {
+        name = decodeURIComponent(name);
+        username = decodeURIComponent(username);
+        document.querySelector(
+          ".thread-header"
+        ).textContent = `Logged in as ${name}`;
+      }
+
+      function threadClickGetPostsHandle(thread, threadElement) {
+        fetch(`http://127.0.0.1:7777/api/threads/${thread.id}/posts`)
+          .then((response) => response.json())
+          .then((posts) => {
+            let postsContainer = document.querySelector(
+              ".thread-posts-" + thread.id
+            );
+            if (postsContainer) {
+              console.log("postsContainer exists, remove it.");
+              document.querySelector(".thread-posts-" + thread.id).innerHTML =
+                "";
+            } else {
+              postsContainer = document.createElement("div");
+              postsContainer.className =
+                "posts-container thread-posts-" + thread.id;
+            }
+
+            posts.forEach((post) => {
+              const postElement = document.createElement("div");
+              postElement.className = "post-item";
+              postElement.innerHTML = `
+                      <strong>${post.user}</strong>: ${post.text}
+                    `;
+              postsContainer.appendChild(postElement);
+            });
+            postsContainer.innerHTML += `
+                    <form class="post-form" id="${thread.id}">
+                      <input id="newPost${thread.id}" type="text" placeholder="New post" onclick="event.preventDefault();" />
+                      <button id="newPostSubmit" onclick="userSendOneNewPost(${thread.id})" type="submit">Post</button>
+                    </form>
+                  `;
+            if (threadElement.contains(postsContainer)) return;
+            threadElement.appendChild(postsContainer);
+          });
+      }
+
+      fetch("http://127.0.0.1:7777/api/threads")
+        .then((response) => response.json())
+        .then((threads) => {
+          const threadsList = document.getElementById("threadsList");
+          threads.forEach((thread) => {
+            const threadElement = document.createElement("div");
+            threadElement.className = "thread-item can-click";
+            threadElement.innerHTML = `
+              <span class="thread-icon can-click">${thread.icon}</span>
+              <span class="can-click">${thread.thread_title}</span>
+            `;
+            threadElement.addEventListener("click", (event) => {
+              console.log(event.target.className);
+              if (event.target.className.indexOf("can-click") < 0) {
+                return;
+              }
+              if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+              }
+
+              document
+                .querySelectorAll(".posts-container")
+                .forEach((postContainer) => {
+                  postContainer.remove();
+                });
+
+              threadClickGetPostsHandle(thread, threadElement);
+
+              intervalId = setInterval(() => {
+                threadClickGetPostsHandle(thread, threadElement);
+              }, 10000);
+            });
+            threadsList.appendChild(threadElement);
+          });
+        })
+        .catch((error) => console.error("Error fetching threads:", error));
+
+      function userSendOneNewPost(threadID) {
+        event.preventDefault();
+
+        console.log("threadID: ", threadID);
+        console.log(event.target.parentNode.parentNode);
+
+        const threadContainer = event.target.parentNode.parentNode;
+        const newPostText = document.getElementById("newPost" + threadID).value;
+        if (!newPostText) return;
+        fetch("http://127.0.0.1:7777/api/threads/" + threadID + "/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: newPostText,
+            user: username,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("New post added:", data);
+            threadClickGetPostsHandle({ id: threadID }, threadContainer);
+          });
+      }
+    </script>
+  </body>
+</html>

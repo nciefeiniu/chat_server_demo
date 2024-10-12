@@ -1,0 +1,43 @@
+body {
+  font-family: 'Open Sans', Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 20px;
+}
+.threads-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.thread-item {
+  background-color: #ffffff;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.thread-item:hover {
+  background-color: #e9ecef;
+}
+.thread-icon {
+  margin-right: 10px;
+}
+.posts-container {
+  margin-top: 20px;
+  border-top: 1px solid #dee2e6;
+  padding-top: 10px;
+}
+.post-item {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+}
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.thread-header {
+  text-align: center;
+  margin: 10px 0;
+  font-weight: 700;
+  font-size: 18px;
+}
