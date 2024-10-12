@@ -73,6 +73,13 @@
                 "posts-container thread-posts-" + thread.id;
             }
 
+            if (thread.user === user) {
+              const delteThreadButton = document.createElement("button");
+              delteThreadButton.className = "delete-thread-button";
+              delteThreadButton.innerHTML = "Delete";
+              postsContainer.appendChild(delteThreadButton);
+            }
+
             posts.forEach((post) => {
               const postElement = document.createElement("div");
               postElement.className = "post-item";
@@ -102,6 +109,27 @@
             `;
         threadElement.addEventListener("click", (event) => {
           console.log(event.target.className);
+
+          if (event.target.className === "delete-thread-button") {
+            event.preventDefault();
+            console.log("click delete button");
+            fetch("http://127.0.0.1:7777/api/threads/" + thread.id, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                user: user,
+              }),
+            }).then((response) => {
+              if (response.ok) {
+                threadElement.remove();
+              } else {
+                alert("Failed to delete thread.");
+              }
+            });
+          }
+
           if (event.target.className.indexOf("can-click") < 0) {
             return;
           }
@@ -172,7 +200,7 @@
       }
 
       document
-        .getElementById("btn-back")
+        .querySelector("#btn-back")
         .addEventListener("click", function () {
           window.history.back();
         });
@@ -212,23 +240,23 @@
       };
 
       function openPopup() {
-        document.getElementById("popup").style.display = "block";
-        document.getElementById("overlay").style.display = "block";
+        document.querySelector("#popup").style.display = "block";
+        document.querySelector("#overlay").style.display = "block";
         isPopupOpen = true;
       }
 
       function closePopup() {
-        document.getElementById("popup").style.display = "none";
-        document.getElementById("overlay").style.display = "none";
+        document.querySelector("#popup").style.display = "none";
+        document.querySelector("#overlay").style.display = "none";
         isPopupOpen = false;
       }
 
       document
-        .getElementById("openCreateNewThread")
+        .querySelector("#openCreateNewThread")
         .addEventListener("click", openPopup);
 
       document
-        .getElementById("postForm")
+        .querySelector("#postForm")
         .addEventListener("submit", function (event) {
           event.preventDefault();
           const thread_title = document.querySelector("#threadTitle").value;
