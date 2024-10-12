@@ -43,6 +43,7 @@
       var user = urlParamsSearchHandle.get("username");
       var intervalId = null;
       var isPopupOpen = false;
+      var hasDeltedThreadIDS = [];
 
       const threadsList = document.getElementById("threadsList");
 
@@ -112,6 +113,10 @@
 
           if (event.target.className === "delete-thread-button") {
             event.preventDefault();
+            if (intervalId) {
+              clearInterval(intervalId);
+              intervalId = null;
+            }
             console.log("click delete button");
             fetch("http://127.0.0.1:7777/api/threads/" + thread.id, {
               method: "DELETE",
@@ -124,6 +129,7 @@
             }).then((response) => {
               if (response.ok) {
                 threadElement.remove();
+                hasDeltedThreadIDS.push(thread.id);
               } else {
                 alert("Failed to delete thread.");
               }
@@ -208,9 +214,13 @@
       document.getElementById("btn-go").addEventListener("click", function () {
         window.history.forward();
       });
-      // window.onpopstate
+
       window.onpopstate = function (event) {
         if (event.state && event.state.showThread) {
+          if (hasDeltedThreadIDS.indexOf(event.state.showThread.id) >= 0) {
+            return;
+          }
+
           if (intervalId) {
             clearInterval(intervalId);
             intervalId = null;
