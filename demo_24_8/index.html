@@ -9,6 +9,10 @@
   <body>
     <div class="thread-header"></div>
     <div class="threads-container">
+      <div class="btn-container">
+        <span id="btn-back">⏪</span>
+        <span id="btn-go">⏩</span>
+      </div>
       <div id="threadsList"></div>
     </div>
 
@@ -71,6 +75,7 @@
           threads.forEach((thread) => {
             const threadElement = document.createElement("div");
             threadElement.className = "thread-item can-click";
+            threadElement.id = "thread-" + thread.id;
             threadElement.innerHTML = `
               <span class="thread-icon can-click">${thread.icon}</span>
               <span class="can-click">${thread.thread_title}</span>
@@ -80,6 +85,17 @@
               if (event.target.className.indexOf("can-click") < 0) {
                 return;
               }
+
+              if (document.querySelector(".thread-posts-" + thread.id)) {
+                return;
+              }
+
+              window.history.pushState(
+                { showThread: thread },
+                "",
+                "thread_posts?id=" + thread.id
+              );
+
               if (intervalId) {
                 clearInterval(intervalId);
                 intervalId = null;
@@ -127,6 +143,46 @@
             threadClickGetPostsHandle({ id: threadID }, threadContainer);
           });
       }
+
+      document
+        .getElementById("btn-back")
+        .addEventListener("click", function () {
+          window.history.back();
+        });
+
+      document.getElementById("btn-go").addEventListener("click", function () {
+        window.history.forward();
+      });
+      // window.onpopstate
+      window.onpopstate = function (event) {
+        if (event.state && event.state.showThread) {
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+
+          document
+            .querySelectorAll(".posts-container")
+            .forEach((postContainer) => {
+              postContainer.remove();
+            });
+          const threadElement = document.getElementById(
+            "thread-" + event.state.showThread.id
+          );
+
+          threadClickGetPostsHandle(event.state.showThread, threadElement);
+
+          intervalId = setInterval(() => {
+            threadClickGetPostsHandle(event.state.showThread, threadElement);
+          }, 10000);
+        } else {
+          document
+            .querySelectorAll(".posts-container")
+            .forEach((postContainer) => {
+              postContainer.remove();
+            });
+        }
+      };
     </script>
   </body>
 </html>

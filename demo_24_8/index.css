@@ -41,3 +41,11 @@ body {
   font-weight: 700;
   font-size: 18px;
 }
+
+.btn-container {
+  margin: 10px 0;
+}
+
+.btn-container span {
+  cursor: pointer;
+}
