@@ -54,6 +54,19 @@
     <div id="app" class="hidden">
       <h2>Thread List</h2>
       <h4></h4>
+
+      <div style="text-align: right; margin-bottom: 10px">
+        <span
+          style="cursor: pointer; background-color: aquamarine"
+          onclick="window.history.back()"
+          >Back</span
+        >
+        <span
+          style="cursor: pointer; background-color: aquamarine"
+          onclick="window.history.forward()"
+          >Forward</span
+        >
+      </div>
       <div id="threadsListWap"></div>
     </div>
 
@@ -105,12 +118,12 @@
               threadItemContainerTag.innerHTML = `<strong>${thread.thread_title}</strong>`;
               threadItemContainerTag.onclick = (event) => {
                 console.log("Who triggered load posts", event.target.tagName);
-                if (
-                  event.target.tagName === "INPUT" ||
-                  event.target.tagName === "BUTTON"
-                ) {
+                if (event.target.tagName === "INPUT") {
                   event.stopPropagation();
                   return;
+                } else if (event.target.tagName === "BUTTON") {
+                  UserSendNewPost2Thread(thread.id);
+                  return
                 }
                 console.log("load posts");
                 loadPosts(thread.id, threadItemContainerTag);
@@ -127,11 +140,13 @@
         threadItemContainerTag,
         setDingshiRenwu = true
       ) {
+        console.log("threadItemContainerTag: ", threadItemContainerTag);
         if (!threadItemContainerTag) {
           threadItemContainerTag = document.querySelector(
             `.thread-item[data-thread-id='${threadId}']`
           );
         } else {
+          console.log("set history");
           window.history.pushState(
             { page: "posts", threadId: threadId },
             "Posts",
@@ -145,7 +160,7 @@
             IntervalRunning = null;
           }
           IntervalRunning = setInterval(() => {
-            loadPosts(threadId, threadItemContainerTag, false);
+            loadPosts(threadId, null, false);
           }, 10000);
         }
 
@@ -183,12 +198,39 @@
               postsContainerTag.appendChild(postElement);
             });
             postsContainerTag.innerHTML += `<div class="new-post-container">
-                <input></input><button>Enter</button>
+                <input class="new-post-input-tag-${threadId}"></input><button onlick="UserSendNewPost2Thread(${threadId})">Enter</button>
               </div>`;
 
             threadItemContainerTag.appendChild(postsContainerTag);
           })
           .catch((error) => console.error("Error fetching posts:", error));
+      }
+
+      function UserSendNewPost2Thread(threadId) {
+        console.log("UserSendNewPost2Thread");
+        event.preventDefault();
+        const userInputVal = document.querySelector(
+          `.new-post-input-tag-${threadId}`
+        ).value;
+        if (!userInputVal) {
+          return;
+        }
+        fetch("http://127.0.0.1:7777/api/threads/" + threadId + "/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: userInputVal,
+            user,
+          }),
+        }).then((response) => {
+          if (response.ok) {
+            loadPosts(threadId, null);
+          } else {
+            alert("Failed to send post.");
+          }
+        });
       }
 
       window.onpopstate = function (event) {
