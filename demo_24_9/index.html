@@ -54,6 +54,9 @@
     <div id="app" class="hidden">
       <h2>Thread List</h2>
       <h4></h4>
+      <div>
+        <button onclick="showUserCreateNewThread()">New Thread</button>
+      </div>
 
       <div style="text-align: right; margin-bottom: 10px">
         <span
@@ -70,10 +73,67 @@
       <div id="threadsListWap"></div>
     </div>
 
+    <div id="new-thread" class="hidden">
+      <h2>New Thread</h2>
+      <label for="new-thread-title">Thread Title:</label>
+      <input type="text" id="new-thread-title" placeholder="Thread Title" />
+
+      <label for="new-thread-content">Thread Content:</label>
+      <input type="text" id="new-thread-content" placeholder="Thread Content" />
+
+      <label for="new-thread-icon">Thread Icon:</label>
+      <input type="text" id="new-thread-icon" placeholder="Thread Icon"></input>
+      <button onclick="userCreateNewThread()">Create</button>
+      <button onclick="showThreadListPage();window.history.back();">Cancel</button>
+    </div>
+
     <script>
       var user,
         name = null;
       var IntervalRunning = null;
+
+      function showUserCreateNewThread() {
+        document.getElementById("app").classList.add("hidden");
+        document.getElementById("new-thread").classList.remove("hidden");
+        window.history.pushState({page: 'newThreadPage'}, "New Thread", "./new-thread");
+      }
+
+      function showThreadListPage() {
+        document.getElementById("app").classList.remove("hidden");
+        document.getElementById("new-thread").classList.add("hidden");
+      }
+
+      function userCreateNewThread() {
+        const newThreadTitle = document.getElementById("new-thread-title")
+          .value;
+        const newThreadContent = document.getElementById("new-thread-content")
+          .value;
+        const newThreadIcon = document.getElementById("new-thread-icon").value;
+
+        fetch("http://127.0.0.1:7777/api/threads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            thread_title: newThreadTitle,
+            text: newThreadContent,
+            icon: newThreadIcon,
+            user
+          }),
+        })
+        .then((response) => {
+          if (response.ok) {
+            alert("Thread created successfully!");
+            document.getElementById("app").classList.remove("hidden");
+            document.getElementById("new-thread").classList.add("hidden");
+            window.history.back()
+          } else {
+            alert("Failed to create thread. Please try again.");
+          }
+        })
+        
+      }
 
       function login() {
         const username = document.getElementById("username").value;
@@ -105,6 +165,9 @@
 
       // ThreadList Component
       function loadThreads() {
+        document.getElementById("app").classList.remove("hidden");
+        document.getElementById("new-thread").classList.add("hidden");
+
         fetch("http://127.0.0.1:7777/api/threads")
           .then((response) => response.json())
           .then((threads) => {
@@ -236,13 +299,19 @@
       window.onpopstate = function (event) {
         const currentPage = event.state ? event.state.page : null;
         const threadId = event.state ? event.state.threadId : null;
+        console.log(currentPage)
         if (currentPage === "threads") {
           loadThreads();
         } else if (currentPage === "posts") {
           loadPosts(threadId);
-        } else {
+        }
+        else if (currentPage === 'newThreadPage') {
+          showUserCreateNewThread();
+        }
+        else {
           document.getElementById("app").classList.add("hidden");
           document.getElementById("login").classList.remove("hidden");
+          document.getElementById('new-thread').classList.add("hidden");
         }
       };
     </script>
