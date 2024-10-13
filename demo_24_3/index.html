@@ -6,20 +6,6 @@
     <title>Index</title>
   </head>
   <body>
-    <script >
-      window.onload = function () {
-        // 页面加载完成
-        const username = sessionStorage.getItem('username');
-        const name = sessionStorage.getItem('name');
-        console.log(username, name)
-        if (username && name) {
-          console.log('ok')
-          window.location.href = `./threads/index.html`;
-        } else {
-          console.log('not ok')
-          window.location.href = `./login/index.html`;
-        }
-      };
-    </script>
+    <script src="./index.js"></script>
   </body>
 </html>

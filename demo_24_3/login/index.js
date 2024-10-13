@@ -16,9 +16,8 @@ async function submitUsername() {
 
     if (userExists) {
       alert(`Login successful, welcome ${username}！`);
-      sessionStorage.setItem('username', userExists.username);
-      sessionStorage.setItem('name', userExists.name);
-      window.location.href = "../threads/index.html";
+      let loginUserParams = 'user=' + encodeURIComponent(userExists.username) + '&name=' + encodeURIComponent(userExists.name);
+      window.location.href = "../threads/index.html" + '?' + loginUserParams;
     } else {
       alert("There is no such user, please check the username");
     }

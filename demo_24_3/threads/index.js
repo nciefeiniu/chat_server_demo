@@ -9,7 +9,7 @@ function deleteThread(deleteThreadID) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({user: username}),
+    body: JSON.stringify({ user: username }),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -46,10 +46,7 @@ function getAllThreads() {
           // 如果是自己的，那么就可删除
           const deleteButton = document.createElement("button");
           deleteButton.innerText = "Delete";
-          deleteButton.setAttribute(
-            "onclick",
-            `deleteThread(${thread.id})`
-          );
+          deleteButton.setAttribute("onclick", `deleteThread(${thread.id})`);
           threadElement.appendChild(deleteButton);
         }
       });
@@ -176,13 +173,17 @@ window.addEventListener("popstate", (event) => {
 
 window.onload = function () {
   // 获取当前 URL 中的参数
-  username = sessionStorage.getItem("username");
-  name = sessionStorage.getItem("name");
+  const loggedUserSearch = new URLSearchParams(window.location.search);
+  username = loggedUserSearch.get("user");
+  name = loggedUserSearch.get("name");
 
   if (!username || !name) {
     window.location.href = "../login/index.html";
     return;
   }
+
+  username = decodeURIComponent(username);
+  name = decodeURIComponent(name);
   document.getElementById("current-user").innerText = name;
   getAllThreads();
 };
