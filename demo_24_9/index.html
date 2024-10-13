@@ -60,6 +60,7 @@
     <script>
       var user,
         name = null;
+      var IntervalRunning = null;
 
       function login() {
         const username = document.getElementById("username").value;
@@ -102,14 +103,52 @@
               threadItemContainerTag.className = "thread-item";
               threadItemContainerTag.setAttribute("data-thread-id", thread.id);
               threadItemContainerTag.innerHTML = `<strong>${thread.thread_title}</strong>`;
-              threadItemContainerTag.onclick = () => loadPosts(thread.id, threadItemContainerTag);
+              threadItemContainerTag.onclick = (event) => {
+                console.log("Who triggered load posts", event.target.tagName);
+                if (
+                  event.target.tagName === "INPUT" ||
+                  event.target.tagName === "BUTTON"
+                ) {
+                  event.stopPropagation();
+                  return;
+                }
+                console.log("load posts");
+                loadPosts(thread.id, threadItemContainerTag);
+              };
+
               threadsContainerTag.appendChild(threadItemContainerTag);
             });
           })
           .catch((error) => console.error("Error fetching threads:", error));
       }
 
-      function loadPosts(threadId, threadItemContainerTag) {
+      function loadPosts(
+        threadId,
+        threadItemContainerTag,
+        setDingshiRenwu = true
+      ) {
+        if (!threadItemContainerTag) {
+          threadItemContainerTag = document.querySelector(
+            `.thread-item[data-thread-id='${threadId}']`
+          );
+        } else {
+          window.history.pushState(
+            { page: "posts", threadId: threadId },
+            "Posts",
+            "./posts?id=" + threadId
+          );
+        }
+
+        if (setDingshiRenwu === true) {
+          if (IntervalRunning) {
+            clearInterval(IntervalRunning);
+            IntervalRunning = null;
+          }
+          IntervalRunning = setInterval(() => {
+            loadPosts(threadId, threadItemContainerTag, false);
+          }, 10000);
+        }
+
         fetch(`http://127.0.0.1:7777/api/threads/${threadId}/posts`)
           .then((response) => response.json())
           .then((threadPostsData) => {
@@ -128,11 +167,14 @@
               postsContainerTag.setAttribute("data-thread-id", threadId);
             }
 
-            window.history.pushState(
-              { page: "posts", threadId: threadId },
-              "Posts",
-              "./posts?id" + threadId
-            );
+            const AllThreadsPosts =
+              document.querySelectorAll(".posts-container");
+            for (let i = 0; i < AllThreadsPosts.length; i++) {
+              const currentPostsTag = AllThreadsPosts[i];
+              if (currentPostsTag.getAttribute("data-thread-id") != threadId) {
+                currentPostsTag.remove();
+              }
+            }
 
             threadPostsData.forEach((post) => {
               const postElement = document.createElement("div");
@@ -142,12 +184,25 @@
             });
             postsContainerTag.innerHTML += `<div class="new-post-container">
                 <input></input><button>Enter</button>
-              </div>`
+              </div>`;
 
-              threadItemContainerTag.appendChild(postsContainerTag);
+            threadItemContainerTag.appendChild(postsContainerTag);
           })
           .catch((error) => console.error("Error fetching posts:", error));
       }
+
+      window.onpopstate = function (event) {
+        const currentPage = event.state ? event.state.page : null;
+        const threadId = event.state ? event.state.threadId : null;
+        if (currentPage === "threads") {
+          loadThreads();
+        } else if (currentPage === "posts") {
+          loadPosts(threadId);
+        } else {
+          document.getElementById("app").classList.add("hidden");
+          document.getElementById("login").classList.remove("hidden");
+        }
+      };
     </script>
   </body>
 </html>
