@@ -21,6 +21,7 @@
         border-radius: 8px;
         cursor: pointer;
         transition: background-color 0.3s;
+        min-width: 500px;
       }
       .thread-item:hover {
         background-color: #e9ecef;
@@ -192,10 +193,44 @@
                 loadPosts(thread.id, threadItemContainerTag);
               };
 
-              threadsContainerTag.appendChild(threadItemContainerTag);
+              const parentDivTag = document.createElement("div");
+              parentDivTag.style = 'display: flex; align-items: center;'
+              parentDivTag.appendChild(threadItemContainerTag);
+              if (thread.user === user) {
+                const userDelSelfThreadBtnTag = document.createElement("button");
+                userDelSelfThreadBtnTag.innerText = "Del";
+                parentDivTag.appendChild(userDelSelfThreadBtnTag)
+                userDelSelfThreadBtnTag.onclick = (event) => {
+                  event.stopPropagation();
+                  console.log("delete thread");
+                  userdeleteSelfThread(thread.id);
+                };
+              }
+              threadsContainerTag.appendChild(parentDivTag);
             });
           })
           .catch((error) => console.error("Error fetching threads:", error));
+      }
+
+      function userdeleteSelfThread(threadId) {
+        fetch(`http://127.0.0.1:7777/api/threads/${threadId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert("Thread deleted successfully!");
+              loadThreads();
+            } else {
+              alert("Failed to delete thread. Please try again.");
+            }
+          })
+         .catch((error) => {})
       }
 
       function loadPosts(
