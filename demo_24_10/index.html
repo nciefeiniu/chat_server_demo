@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Server</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="loginPage" class="container">
+      <h2>Login</h2>
+      <input type="text" id="usernameInput" placeholder="Enter your username" />
+      <button onclick="userSubmitUsernameInputHandle()">Login</button>
+    </div>
+
+    <div id="threadsPage" class="container hidden">
+      <h2>Threads</h2>
+      <div class="logged-who"></div>
+      <ul id="threadsList"></ul>
+      <button onclick="displayCreateThreadFormPageHandle()">
+        Create Thread
+      </button>
+      <button onclick="window.history.back()">BACK</button>
+      <button onclick="window.history.forward()">FORWARD</button>
+    </div>
+
+    <div id="createThreadPage" class="container hidden">
+      <h2>Create Thread</h2>
+      <input
+        type="text"
+        id="threadTitleInput"
+        placeholder="Thread title"
+      /><br />
+      <input
+        type="text"
+        id="threadIconInput"
+        placeholder="Icon (e.g., 🎸)"
+      /><br />
+      <textarea id="threadTextInput" placeholder="Text"></textarea><br />
+      <button onclick="submitCreateNewThreadHandle()">Submit</button>
+      <button onclick="displayThreadsPageHandle()">Cancel</button>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

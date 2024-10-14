@@ -1,0 +1,82 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  text-align: center;
+}
+.hidden {
+  display: none;
+}
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: #0056b3;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  background-color: #e9ecef;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+li > button {
+  padding: 0 !important;
+  font-size: 10px;
+  line-height: 20px;
+  width: 20px;
+}
+.logged-who {
+  text-align: right;
+}
+i {
+  background-color: lemonchiffon;
+  padding: 5px 20px;
+}
+.post {
+  text-align: left;
+}
+
+.post-input {
+  width: 300px;
+}
+
+.post-new-submit {
+  line-height: 37px;
+  width: 37px;
+}
+
+.post-owner {
+  font-size: 12px;
+}
