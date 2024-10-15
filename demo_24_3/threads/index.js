@@ -137,7 +137,7 @@ function togglePosts(threadId, threadTitle) {
 }
 
 function newThread() {
-  window.location.href = "./new_thread.html";
+  window.location.href = "./new_thread.html?username=" + encodeURIComponent(username);
 }
 
 function goBack() {

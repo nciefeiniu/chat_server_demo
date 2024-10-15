@@ -1,3 +1,8 @@
+let username = null;
+
+const loggedUserSearch = new URLSearchParams(window.location.search);
+username = decodeURIComponent(loggedUserSearch.get("username"));
+
 document
   .getElementById("createThreadForm")
   .addEventListener("submit", function (event) {
@@ -12,7 +17,7 @@ document
       thread_title: threadTitle,
       icon: icon,
       text: text,
-      user: sessionStorage.getItem("username"),
+      user: username,
     };
 
     // 发送 POST 请求
@@ -40,7 +45,6 @@ document
       });
   });
 
-
-  document.querySelector('.go-back').addEventListener('click', () => {
-    window.history.back();
-  })
+document.querySelector(".go-back").addEventListener("click", () => {
+  window.history.back();
+});
