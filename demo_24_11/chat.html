@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat 😀</title>
+    <link rel="stylesheet" href="./chat.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Chat App</h1>
+      <p id="logged-as" style="text-align: right"></p>
+
+      <div class="login">
+        <p>Login</p>
+        <input type="text" id="username" placeholder="Enter username" />
+        <button onclick="login()">Login</button>
+        <p id="login-message"></p>
+      </div>
+
+      <div class="thread-list" id="thread-list" style="display: none">
+        <div>
+          <button onclick="window.history.back()">👈</button
+          ><button onclick="window.history.forward()">👉</button>
+        </div>
+        <p>Threads:</p>
+        <div id="threads"></div>
+      </div>
+
+      <div class="create-thread" id="create-thread" style="display: none">
+        <p>Create a New Thread</p>
+        <input type="text" id="new-thread-title" placeholder="Thread Title" />
+        <input type="text" id="new-thread-icon" placeholder="Thread Icon" />
+        <textarea
+          id="new-thread-post"
+          placeholder="First post message"
+        ></textarea>
+        <button onclick="createThread()">Create Thread</button>
+        <p id="create-thread-message"></p>
+      </div>
+    </div>
+
+    <script src="./chat.js"></script>
+  </body>
+</html>

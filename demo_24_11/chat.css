@@ -1,0 +1,62 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h1 {
+  text-align: center;
+}
+.login,
+.create-thread,
+.thread-list {
+  margin-bottom: 20px;
+}
+.login input,
+.create-thread input,
+.create-thread textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  box-sizing: border-box;
+}
+.login button,
+.create-thread button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.thread {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+.thread-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #007bff;
+}
+.posts {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+.post {
+  margin-bottom: 10px;
+}
+.logged-name {
+  font-weight: 700;
+  color: darkgreen;
+}
+.post-owner-name {
+  font-size: 10px;
+}
