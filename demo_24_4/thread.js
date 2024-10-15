@@ -1,8 +1,8 @@
 var currentThread = undefined;
 var currentInterval = undefined;
 var deletedThreadsID = [];
-var username = undefined
-var name = undefined
+var username = undefined;
+var name = undefined;
 
 const threadList = document.getElementById("thread-list");
 const backBtn = document.getElementById("back-btn");
@@ -14,7 +14,7 @@ window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   name = decodeURIComponent(urlParams.get("name"));
   username = decodeURIComponent(urlParams.get("username"));
-  document.getElementById('logged-name').textContent = `Logged in as ${name}`
+  document.getElementById("logged-name").textContent = `Logged in as ${name}`;
 };
 
 function renderThreads(threads) {
@@ -26,7 +26,10 @@ function renderThreads(threads) {
   document.getElementById("new-thread-btn").style.display = "inline";
   console.log("render threads");
   threadList.innerHTML = "";
-  threads.forEach((thread, index) => {
+
+  for (let i = 0; i < threads.length; i++) {
+    const thread = threads[i];
+    const index = i;
     const threadElem = document.createElement("div");
     threadElem.className = "thread";
     threadElem.textContent = thread.thread_title;
@@ -34,7 +37,7 @@ function renderThreads(threads) {
       showThreadPosts(thread, index);
     };
     threadList.appendChild(threadElem);
-  });
+  }
 }
 
 function showThreadPosts(thread, index, add2History = true) {
@@ -84,12 +87,15 @@ function renderPosts(thread) {
   const postsTitle = document.createElement("h2");
   postsTitle.innerHTML = `Posts in <span class="thread-title-span">${thread.thread_title}</span>`;
   postsContainer.appendChild(postsTitle);
-  thread.posts.forEach((post) => {
+
+  for (let i = 0; i < thread.posts.length; i++) {
+    const post = thread.posts[i];
     const postElem = document.createElement("div");
     postElem.className = "post";
     postElem.textContent = post.text + " - " + post.name;
     postsContainer.appendChild(postElem);
-  });
+  }
+
   threadList.appendChild(postsContainer);
   threadList.innerHTML +=
     '<input class="post-input"></input><button class="post-btn" onclick="sendPost()">Post</button>';
