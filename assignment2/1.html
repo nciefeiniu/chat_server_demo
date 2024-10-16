@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Forum</title>
+  <link rel="stylesheet" href="1.css">
+</head>
+
+<body>
+  <div id="login-container" class="container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter your username" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="app-container" class="container" style="display:none;">
+    <h2>Welcome <span id="current-user"></span></h2>
+    <div class="threads" id="threads"></div>
+    <button onclick="openNewThreadModal()">Create New Thread</button>
+  </div>
+
+  <div id="new-thread-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeNewThreadModal()">&times;</span>
+      <h2>Create New Thread</h2>
+      <input type="text" id="threadTitle" placeholder="Thread Title" />
+      <textarea id="initialPost" placeholder="Initial Post"></textarea>
+      <button onclick="createNewThread()">Submit</button>
+    </div>
+  </div>
+
+  <div id="posts-container" class="container" style="display:none;">
+    <h3><span id="current-thread-title"></span></h3>
+    <div id="posts"></div>
+    <textarea id="newPost" placeholder="Add a post..."></textarea>
+    <button onclick="submitPost()">Submit Post</button>
+    <button onclick="goBackToThreads()">Back to Threads</button>
+  </div>
+
+  <script src="1.js"></script>
+</body>
+
+</html>
