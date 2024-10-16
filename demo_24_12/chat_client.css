@@ -1,0 +1,16 @@
+.container {
+  /* margin-top: 200px; */
+  margin: 200px auto;
+  width: 800px;
+}
+.thread-item-title {
+  color: blue;
+  font-weight: 600;
+  font-size: 18px;
+}
+.thread-item {
+  padding: 20px;
+}
+.user-name {
+  margin: 10px 2px;
+}
