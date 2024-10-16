@@ -45,9 +45,9 @@ async function createThread() {
 
 function hiddenAllPosts() {
   const postsDivs = document.querySelectorAll(".posts");
-  postsDivs.forEach((postsDiv) => {
-    postsDiv.style.display = "none";
-  });
+  for (var i=0; i < postsDivs.length; i++) {
+    postsDivs[i].style.display = "none";
+  }
 }
 
 async function fetchThreads() {
@@ -87,7 +87,8 @@ async function deleteThread(threadId) {
 function displayThreads(threads) {
   const container = document.getElementById("threads-container");
   container.innerHTML = "";
-  threads.forEach((thread) => {
+  for (var i=0; i < threads.length; i++) {
+    let thread = threads[i];
     const threadDiv = document.createElement("div");
     threadDiv.classList.add("thread-title");
     threadDiv.id = `thread-${thread.id}`;
@@ -111,7 +112,7 @@ function displayThreads(threads) {
     postsDiv.classList.add("posts");
     postsDiv.id = `posts-${thread.id}`;
     container.appendChild(postsDiv);
-  });
+  }
 }
 
 async function loadPosts(threadId, setIntervalMark = true) {
@@ -146,8 +147,8 @@ async function loadPosts(threadId, setIntervalMark = true) {
 
 function displayPosts(posts, postsDiv, threadId) {
   postsDiv.innerHTML = "";
-
-  posts.forEach((post) => {
+  for (var i=0; i<posts.length; i++) {
+    const post = posts[i];
     const postDiv = document.createElement("div");
     postDiv.classList.add("thread-message");
     postDiv.innerHTML = `
@@ -155,7 +156,7 @@ function displayPosts(posts, postsDiv, threadId) {
                     <span class="username">- ${post.name}</span>
                 `;
     postsDiv.appendChild(postDiv);
-  });
+  }
 
   const replyBox = document.createElement("div");
   replyBox.classList.add("reply-box");
