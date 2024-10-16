@@ -17,6 +17,9 @@
 
   <div id="app-container" class="container" style="display:none;">
     <h2>Welcome <span id="current-user"></span></h2>
+    <div style="text-align: right;">
+      <button onclick="logout()">Logout</button>
+    </div>
     <div class="threads" id="threads"></div>
     <button onclick="openNewThreadModal()">Create New Thread</button>
   </div>
@@ -26,6 +29,7 @@
       <span class="close" onclick="closeNewThreadModal()">&times;</span>
       <h2>Create New Thread</h2>
       <input type="text" id="threadTitle" placeholder="Thread Title" />
+      <input type="text" id="threadIcon" placeholder="Thread Icon"></input>
       <textarea id="initialPost" placeholder="Initial Post"></textarea>
       <button onclick="createNewThread()">Submit</button>
     </div>
