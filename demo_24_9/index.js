@@ -79,7 +79,8 @@ function loadThreads() {
     .then((threads) => {
       const threadsContainerTag = document.getElementById("threadsListWap");
       threadsContainerTag.innerHTML = "";
-      threads.forEach((thread) => {
+      for (let a = 0; a < threads.length; a++) {
+        const thread = threads[a];
         const threadItemContainerTag = document.createElement("div");
         threadItemContainerTag.className = "thread-item";
         threadItemContainerTag.setAttribute("data-thread-id", thread.id);
@@ -111,7 +112,7 @@ function loadThreads() {
           };
         }
         threadsContainerTag.appendChild(parentDivTag);
-      });
+      }
     })
     .catch((error) => console.error("Error fetching threads:", error));
 }
@@ -186,12 +187,13 @@ function loadPosts(threadId, threadItemContainerTag, setDingshiRenwu = true) {
         }
       }
 
-      threadPostsData.forEach((post) => {
+      for (let a = 0; a < threadPostsData.length; a++) {
+        const post = threadPostsData[a];
         const postElement = document.createElement("div");
         postElement.className = "post-item";
         postElement.innerHTML = `${post.text} <br> &nbsp;&nbsp;&nbsp;&nbsp; - ${post.name}`;
         postsContainerTag.appendChild(postElement);
-      });
+      }
       postsContainerTag.innerHTML += `<div class="new-post-container">
                 <input class="new-post-input-tag-${threadId}"></input><button onlick="UserSendNewPost2Thread(${threadId})">Enter</button>
               </div>`;
