@@ -1,5 +1,6 @@
 import { Client } from "https://deno.land/x/postgres@v0.19.3/mod.ts";
 import { serve } from "https://deno.land/std@0.90.0/http/server.ts";
+import { getCookies } from "https://deno.land/std@0.90.0/http/mod.ts"; 
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
 const databaseInfo = {
@@ -12,6 +13,9 @@ const databaseInfo = {
 
 const serverPort = 8080;
 
+// 会话存储
+const sessions = {};
+
 // 连接postgresql数据库
 const client = new Client(databaseInfo);
 
@@ -22,7 +26,20 @@ headers.set("Access-Control-Allow-Origin", "*");
 headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
 headers.set("Access-Control-Allow-Headers", "Content-Type");
 
-async function readJson(req){
+
+function generateRandomString(length=16) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+
+  for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}
+
+async function readJson(req) {
   const buf = await Deno.readAll(req.body);
   return JSON.parse(decoder.decode(buf));
 }
@@ -47,18 +64,19 @@ async function createUser(req) {
     });
   }
   const result = await client.queryArray(
-    `SELECT id,username,password FROM users WHERE username = '${username}'`);
-  console.log(result)
+    `SELECT id,username,password FROM users WHERE username = '${username}'`
+  );
   if (result.rows.length > 0) {
     return req.respond({
       headers,
-      status: 405,
+      status: 403,
       body: JSON.stringify({ message: "User already exists!" }),
     });
   }
   const hashedPassword = await bcrypt.hash(password); // 密码使用 bcrypt 加密
   await client.queryArray(
-    `INSERT INTO users (username, password) VALUES ('${username}', '${hashedPassword}');`);
+    `INSERT INTO users (username, password) VALUES ('${username}', '${hashedPassword}');`
+  );
   await client.queryArray("COMMIT");
   return req.respond({
     headers,
@@ -69,7 +87,7 @@ async function createUser(req) {
 
 async function login(req) {
   const { username, password } = await req.json(req);
-  console.log(`username: ${username}`)
+  console.log(`username: ${username}`);
   // 检查 username 和 password 是否存在
   if (!username || !password) {
     return req.respond({
@@ -81,8 +99,8 @@ async function login(req) {
     });
   }
   const result = await client.queryArray(
-    `SELECT id,username,password FROM users WHERE username = '${username}'`);
-  console.log(result)
+    `SELECT id,username,password FROM users WHERE username = '${username}'`
+  );
   if (result.rows.length === 0) {
     // 用户不存在
     return req.respond({
@@ -97,8 +115,15 @@ async function login(req) {
   const isPasswordCorrect = await bcrypt.compare(password, userInfo[2]);
   if (isPasswordCorrect) {
     // 登录成功
+    const sessionId = generateRandomString();
+    sessions[sessionId] = { username: userInfo[1], isLoggedIn: true, id: userInfo[0] }
+    const loginHeaders = new Headers();
+    loginHeaders.set("Access-Control-Allow-Origin", "*");
+    loginHeaders.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    loginHeaders.set("Access-Control-Allow-Headers", "Content-Type");
+    loginHeaders.set("Set-Cookie", `sessionId=${sessionId}; Path=/; HttpOnly`);
     return req.respond({
-      headers,
+      headers: loginHeaders,
       status: 200,
       body: JSON.stringify({
         message: "Login successful!",
@@ -121,7 +146,9 @@ async function main() {
   for await (const req of server) {
     const pathname = req.url;
     const method = req.method;
-    req.json = readJson
+    const now = new Date();
+    console.log(`(${now.toISOString()}) Request: ${method} ${pathname}`);
+    req.json = readJson;
     try {
       if (method === "OPTIONS") {
         // 预检请求，直接返回 204 No Content
@@ -138,7 +165,7 @@ async function main() {
         req.respond({ headers, status: 404 });
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       req.respond({ headers, status: 500, body: error.message });
     }
   }
