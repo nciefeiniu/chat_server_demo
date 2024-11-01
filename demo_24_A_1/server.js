@@ -167,7 +167,9 @@ async function getLinks(req) {
   let result = [];
   if (currentUserID) {
     result = await client.queryObject(
-      `SELECT a.id,link,title,"desc",score, u.username FROM links a join users u on u.id = a.user_id order by score desc;`
+      `SELECT a.id,link,title,"desc",score, u.username FROM links a join users u on u.id = a.user_id
+      where a.id not in (select link_id from bad_link c where c.user_id=${currentUserID})
+      order by score desc;`
     );
   } else {
     result = await client.queryObject(
@@ -196,7 +198,8 @@ async function updateLinkScore(req, linkID) {
       评分是5，加2分
 
 
-  而且，如果评分是 4，5，还需要把这个link加入到收藏表中，也就是我们的收藏夹中
+  而且，
+    如果评分是 4，5，还需要把这个link加入到收藏表中，也就是我们的收藏夹中
   */
   const { score } = await req.json(req);
 
@@ -262,6 +265,44 @@ async function updateLinkScore(req, linkID) {
   });
 }
 
+
+async function getLinkPersonalScore(req, linkID) {
+  // 获取用户信息
+  const currentUserID = req.currentUserID;
+  const result = await client.queryObject(
+    `SELECT score FROM score_detail WHERE user_id = ${currentUserID} AND link_id = ${linkID}`
+  );
+  return req.respond({
+    headers,
+    status: 200,
+    body: JSON.stringify({
+      message: "Link personal score fetched successfully!",
+      data: result.rows.length > 0 ? result.rows[0] : null,
+    }),
+  });
+}
+
+async function hideLink(req, linkID) {
+  const currentUserID = req.currentUserID;
+  const result = await client.queryArray(
+    `SELECT * FROM bad_link WHERE link_id = ${linkID} and user_id = ${currentUserID};`
+  );
+  if (result.rows.length < 1) {
+    await client.queryArray(
+      `INSERT INTO bad_link (user_id, link_id) VALUES (${currentUserID}, ${linkID});`
+    );
+    
+  } 
+  return req.respond({
+    headers,
+    status: 201,
+    body: JSON.stringify({
+      message: "Link hidden successfully!",
+      data: { id: linkID },
+    }),
+  });
+}
+
 async function main() {
   await client.connect(); // 连接数据库
   const server = serve({ port: serverPort });
@@ -295,7 +336,11 @@ async function main() {
       } else if (pathname === "/login" && method === "POST") {
         // 登录
         await login(req);
-      } else if (pathname === "/links" && req.currentUserID) {
+      } else if (pathname.startsWith('/link/hidden') && req.currentUserID) {
+        // 隐藏某个link
+        const linkID = pathname.split("/")[3];
+        await hideLink(req, linkID)
+      } else if (pathname === "/links") {
         // 提交带有标题和描述的新链接
         if (method === "POST") {
           await createNewLink(req);
@@ -304,14 +349,14 @@ async function main() {
         } else {
           req.respond({ headers, status: 405 });
         }
-      } else if (
-        pathname.startsWith("/link/score") &&
-        method === "POST" &&
-        req.currentUserID
-      ) {
-        // 用户给这个链接评分
+      } else if (pathname.startsWith("/link/score") && req.currentUserID) {
         const linkID = pathname.split("/")[3];
-        await updateLinkScore(req, linkID);
+        if (method === "POST") {
+          // 用户给这个链接评分
+          await updateLinkScore(req, linkID);
+        } else {
+          await getLinkPersonalScore(req, linkID);
+        }
       } else {
         req.respond({ headers, status: 404 });
       }

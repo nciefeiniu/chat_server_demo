@@ -1,182 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Squirrel Pals App</title>
-    <link rel="stylesheet" href="./index.css" />
-  </head>
-  <body>
-    <div id="app">
-      <div
-        class="login-container"
-        v-if="showPage === 'login' || showPage === 'register'"
-      >
-        <h2>{{ showPage === 'login'? 'Login': 'Register' }}</h2>
-        <div class="form-group">
-          <label for="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            v-model="username"
-            placeholder="Enter your username"
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            placeholder="Enter your password"
-          />
-        </div>
-        <button class="btn" @click="clickHandle">
-          {{ showPage === 'login'? 'Login': 'Register' }}
-        </button>
-        <div
-          style="
-            text-align: right;
-            font-size: 12px;
-            cursor: pointer;
-            color: aquamarine;
-          "
-          @click="showPage='register'"
-          v-if="showPage === 'login'"
-        >
-          <span>Go To Register</span>
-        </div>
-        <div
-          style="
-            text-align: right;
-            font-size: 12px;
-            cursor: pointer;
-            color: aquamarine;
-          "
-          @click="showPage='login'"
-          v-else
-        >
-          <span>Go To Login</span>
-        </div>
-      </div>
 
-      <div class="main-container" v-if="showPage==='main'">
-        <div style="text-align: center">
-          <h2>Welcome Squirrel Pals App</h2>
-        </div>
-        <div class="new-link-container" >
-          <button @click="toggleModal" v-if="logged">New Link</button>
-          <button @click="showPage='login'" v-else>Login</button>
-        </div>
-        <div class="links-container">
-          <div
-            class="accordion"
-            :id="'link-' + item.id"
-            v-for="item in links"
-            :key="item.id"
-            @click="linkItemClick(item.id)"
-          >
-            <div class="accordion-header">
-              <span class="link-title">{{item.title}}</span>
-              <span class="link-owner">{{ item.username }}</span>
-              <span class="link-score">{{item.score}}</span>
-            </div>
-            <div class="accordion-content">
-              <p>{{ item.desc }}</p>
-              <div class="comment-container" v-if="logged">
-                Score: <select @click.stop="() => {}" @change="(event) => {handleChange(event, item.id)}">
-                  <option :value="null">Please select an option</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Squirrel Pals App</title>
+  <link rel="stylesheet" href="./index.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="login-container" v-if="showPage === 'login' || showPage === 'register'">
+      <h2>{{ showPage === 'login'? 'Login': 'Register' }}</h2>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" v-model="username" placeholder="Enter your username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" placeholder="Enter your password" />
+      </div>
+      <button class="btn" @click="clickHandle">
+        {{ showPage === 'login'? 'Login': 'Register' }}
+      </button>
+      <div style="
+            text-align: right;
+            font-size: 12px;
+            cursor: pointer;
+            color: aquamarine;
+          " @click="showPage='register'" v-if="showPage === 'login'">
+        <span>Go To Register</span>
+      </div>
+      <div style="
+            text-align: right;
+            font-size: 12px;
+            cursor: pointer;
+            color: aquamarine;
+          " @click="showPage='login'" v-else>
+        <span>Go To Login</span>
+      </div>
+    </div>
+
+    <div class="main-container" v-if="showPage==='main'">
+      <div style="text-align: center">
+        <h2>Welcome Squirrel Pals App</h2>
+      </div>
+      <div class="new-link-container">
+        <button @click="toggleModal" v-if="logged">New Link</button>
+        <button @click="showPage='login'" v-else>Login</button>
+      </div>
+      <div class="links-container">
+        <div class="accordion" :id="'link-' + item.id" v-for="item in links" :key="item.id"
+          @click="linkItemClick(item)">
+          <div class="accordion-header">
+            <span class="link-title">{{item.title}}</span>
+            <span class="link-owner">{{ item.username }}</span>
+            <span class="link-score">{{item.score}}</span>
+          </div>
+          <div class="accordion-content">
+            <p class="link-item"><a :href="item.link" target="_blank">{{ item.link }}</a></p>
+            <p>{{ item.desc }}</p>
+            <div class="comment-container" v-if="logged">
+              Score:
+              <select v-model="item.personalScore" @click.stop="() => {}"
+                @change="(event) => {handleChange(event, item.id)}">
+                <option :value="null">Please select an option</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <div style="display: flex;">
+                <span style="margin-left: auto;"><button @click.stop="hiddenLink(item.id)">Hidden</button></span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- overlay  -->
-      <div class="overlay" @click="toggleModal"></div>
-      <!-- modal -->
-      <div class="modal" id="modal">
-        <h2>New link:</h2>
-        <form>
-          <label for="title">Title:</label><br />
-          <input type="text" id="title" name="title" /><br />
-          <label for="desc">Description:</label><br />
-          <textarea id="desc" name="desc"></textarea><br />
-          <label for="link">Link:</label><br />
-          <input type="text" id="link" name="link" /><br /><br />
-        </form>
-        <button class="form-btn" @click="submitNewLink">Submit</button>
-      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.5.12/dist/vue.global.min.js"></script>
-    <script>
-      const { createApp, ref } = Vue;
+    <!-- overlay  -->
+    <div class="overlay" @click="toggleModal"></div>
+    <!-- modal -->
+    <div class="modal" id="modal">
+      <h2>New link:</h2>
+      <form>
+        <label for="title">Title:</label><br />
+        <input type="text" id="title" name="title" /><br />
+        <label for="desc">Description:</label><br />
+        <textarea id="desc" name="desc"></textarea><br />
+        <label for="link">Link:</label><br />
+        <input type="text" id="link" name="link" /><br /><br />
+      </form>
+      <button class="form-btn" @click="submitNewLink">Submit</button>
+    </div>
+  </div>
 
-      createApp({
-        data() {
-          return {
-            logged: false,
-            showPage: "main",
-            username: "",
-            password: "",
-            links: [],
-          };
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.12/dist/vue.global.min.js"></script>
+  <script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+      data() {
+        return {
+          logged: false,
+          showPage: "main",
+          username: "",
+          password: "",
+          links: [],
+        };
+      },
+      mounted() {
+        this.getAllLinks();
+      },
+      methods: {
+        async hiddenLink(linkID) {
+          console.log('hidden link: ', linkID)
+          const response = await fetch(
+            `http://127.0.0.1:8080/link/hidden/${linkID}`,
+            {
+              mode: "cors",
+              credentials: "include",
+              method: "GET",
+            }
+          );
+          if (response.status > 210) {
+            alert("Hidden failed");
+            return;
+          }
+          const data = await response.json();
+          await this.getAllLinks();
         },
-        mounted(){
-          this.getAllLinks();
-        },
-        methods: {
-          async handleChange(event, linkID) {
-            event.stopPropagation();
-            const value = event.target.value;
-            console.log('选择的分数：', value)
-            if (!value) {
-              return
-            }
-            const response = await fetch(
-              `http://127.0.0.1:8080/link/score/${linkID}`,
-              {
-                mode: "cors",
-                credentials: "include",
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  score: value
-                }),
-              }
-            );
-            if (response.status > 210) {
-              alert("Score failed");
-              return;
-            }
-            const data = await response.json();
-            console.log(data)
-            
-          },
-          linkItemClick(linkID) {
-            const linkItem = document.getElementById(`link-${linkID}`);
-            linkItem.classList.toggle("active");
-          },
-          async submitNewLink() {
-            const title = document.getElementById("title").value;
-            const desc = document.getElementById("desc").value;
-            const link = document.getElementById("link").value;
-
-            if (!title || !desc || !link) {
-              alert("Please fill in all fields");
-              return;
-            }
-
-            const response = await fetch("http://127.0.0.1:8080/links", {
+        async handleChange(event, linkID) {
+          event.stopPropagation();
+          const value = event.target.value;
+          console.log("选择的分数：", value);
+          if (!value) {
+            return;
+          }
+          const response = await fetch(
+            `http://127.0.0.1:8080/link/score/${linkID}`,
+            {
               mode: "cors",
               credentials: "include",
               method: "POST",
@@ -184,82 +149,143 @@
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                title,
-                desc,
-                link,
+                score: value,
               }),
-            });
-            if (response.status > 210) {
-              alert("Publish failed");
-              return;
             }
-            const respJson = await response.json();
-            alert("Publish successfully");
-            await this.getAllLinks();
-          },
-          toggleModal() {
-            const modal = document.getElementById("modal");
-            const overlay = document.querySelector(".overlay");
-            modal.style.display =
-              modal.style.display === "block" ? "none" : "block";
-            overlay.style.display =
-              overlay.style.display === "block" ? "none" : "block";
-          },
-          async getAllLinks() {
-            const response = await fetch("http://127.0.0.1:8080/links", {
+          );
+          if (response.status > 210) {
+            alert("Score failed");
+            return;
+          }
+          const data = await response.json();
+          console.log(data);
+        },
+        async linkItemClick(linkInfo) {
+          const linkItem = document.getElementById(`link-${linkInfo.id}`);
+          linkItem.classList.toggle("active");
+          console.log('linkItem.classList: ', linkItem.classList)
+          if (linkItem.classList.contains("active") && this.logged) {
+            // 需要去获取当前用户给这个的评分
+            await this.personalLinkScore(linkInfo)
+          }
+        },
+        async personalLinkScore(linkInfo){
+          const response = await fetch(
+            `http://127.0.0.1:8080/link/score/${linkInfo.id}`,
+            {
               mode: "cors",
               credentials: "include",
-            });
-            const respJson = await response.json();
-            console.log("links: ", respJson);
-            this.links = respJson.data;
-          },
-          async clickHandle() {
-            const fetchUri =
-              this.showPage === "login"
-                ? "http://127.0.0.1:8080/login"
-                : "http://127.0.0.1:8080/register";
-            const response = await fetch(fetchUri, {
-              mode: "cors",
-              credentials: "include",
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                username: this.username,
-                password: this.password,
-              }),
-            });
-            const respJson = await response.json();
-            if (response.status === 200) {
-              // 计算明天的日期
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
-              document.cookie = `sessionID=${
-                respJson.data.token
+              method: "GET",
+            }
+          );
+          if (response.status > 210) {
+            alert("get link Score failed");
+            return;
+          }
+          const respJson = await response.json();
+          linkInfo.personalScore = respJson.data ? respJson.data.score : null
+        },
+        async submitNewLink() {
+          const title = document.getElementById("title").value;
+          const desc = document.getElementById("desc").value;
+          const link = document.getElementById("link").value;
+
+          if (!title || !desc || !link) {
+            alert("Please fill in all fields");
+            return;
+          }
+
+          const response = await fetch("http://127.0.0.1:8080/links", {
+            mode: "cors",
+            credentials: "include",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title,
+              desc,
+              link,
+            }),
+          });
+          if (response.status > 210) {
+            alert("Publish failed");
+            return;
+          }
+          const respJson = await response.json();
+          alert("Publish successfully");
+          await this.getAllLinks();
+          this.toggleModal();
+        },
+        toggleModal() {
+          const modal = document.getElementById("modal");
+          const overlay = document.querySelector(".overlay");
+          modal.style.display =
+            modal.style.display === "block" ? "none" : "block";
+          overlay.style.display =
+            overlay.style.display === "block" ? "none" : "block";
+        },
+        async getAllLinks() {
+          const response = await fetch("http://127.0.0.1:8080/links", {
+            mode: "cors",
+            credentials: "include",
+          });
+          const respJson = await response.json();
+          console.log("links: ", respJson);
+          this.links = respJson.data;
+
+          const linkContainers = document.querySelectorAll('.accordion')
+          for (let i=0; i<linkContainers.length; i++) {
+            const linkItem = linkContainers[i]
+            linkItem.classList.remove('active')
+          }
+
+        },
+        async clickHandle() {
+          const fetchUri =
+            this.showPage === "login"
+              ? "http://127.0.0.1:8080/login"
+              : "http://127.0.0.1:8080/register";
+          const response = await fetch(fetchUri, {
+            mode: "cors",
+            credentials: "include",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: this.username,
+              password: this.password,
+            }),
+          });
+          const respJson = await response.json();
+          if (response.status === 200) {
+            // 计算明天的日期
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.cookie = `sessionID=${respJson.data.token
               }; expires=${tomorrow.toUTCString()}; path=/; domain=localhost;`;
-              document.cookie = `sessionID=${
-                respJson.data.token
+            document.cookie = `sessionID=${respJson.data.token
               }; expires=${tomorrow.toUTCString()}; path=/; domain=127.0.0.1;`;
-              alert("Login Success");
-              this.logged = true;
-              await this.getAllLinks();
-              this.showPage = "main";
-            } else if (response.status === 404) {
-              alert("user name does not exist");
-            } else if (response.status === 401) {
-              alert("Password error");
-            } else if (response.status === 201) {
-              alert("Register Success");
-            } else if (response.status === 403) {
-              alert("user name already exists");
-            } else {
-              alert("unknown error");
-            }
-          },
+            alert("Login Success");
+            this.logged = true;
+            await this.getAllLinks();
+            this.showPage = "main";
+          } else if (response.status === 404) {
+            alert("user name does not exist");
+          } else if (response.status === 401) {
+            alert("Password error");
+          } else if (response.status === 201) {
+            alert("Register Success");
+          } else if (response.status === 403) {
+            alert("user name already exists");
+          } else {
+            alert("unknown error");
+          }
         },
-      }).mount("#app");
-    </script>
-  </body>
+      },
+    }).mount("#app");
+  </script>
+</body>
+
 </html>

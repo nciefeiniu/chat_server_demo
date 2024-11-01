@@ -166,3 +166,8 @@ form textarea {
   text-align: right;
   margin: 10px 0;
 }
+
+.link-item {
+  font-size: 14px;
+  color: blue;
+}
