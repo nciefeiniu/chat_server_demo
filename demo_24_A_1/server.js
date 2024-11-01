@@ -244,14 +244,12 @@ async function updateLinkScore(req, linkID) {
     `UPDATE links SET score = ${totalScore} WHERE id = ${linkID};`
   );
 
+  await client.queryArray(
+    `DELETE FROM good_link WHERE user_id = ${currentUserID} AND link_id = ${linkID};`
+  );
   if (score > 3) {
     await client.queryArray(
       `INSERT INTO good_link (user_id, link_id) VALUES (${currentUserID}, ${linkID});`
-    );
-  } else {
-    // 如果分数低于 3 分，就从收藏夹中移除
-    await client.queryArray(
-      `DELETE FROM good_link WHERE user_id = ${currentUserID} AND link_id = ${linkID};`
     );
   }
   await client.queryArray("COMMIT");
@@ -299,6 +297,22 @@ async function hideLink(req, linkID) {
     body: JSON.stringify({
       message: "Link hidden successfully!",
       data: { id: linkID },
+    }),
+  });
+}
+
+async function getFavouriteLinks(req) {
+  const currentUserID = req.currentUserID;
+  const result = await client.queryObject(
+    `SELECT a.id,link,title,"desc",score, u.username FROM good_link b join links a on a.id = b.link_id join users u on u.id = a.user_id where b.user_id=${currentUserID} order by score desc;`
+  );
+  console.log('fav: ', result)
+  return req.respond({
+    headers,
+    status: 200,
+    body: JSON.stringify({
+      message: "Favourite links fetched successfully!",
+      data: result.rows,
     }),
   });
 }
@@ -357,6 +371,8 @@ async function main() {
         } else {
           await getLinkPersonalScore(req, linkID);
         }
+      } else if (pathname.startsWith("/link/favourites") && req.currentUserID) {
+        await getFavouriteLinks(req);
       } else {
         req.respond({ headers, status: 404 });
       }

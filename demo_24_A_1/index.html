@@ -46,6 +46,9 @@
         <h2>Welcome Squirrel Pals App</h2>
       </div>
       <div class="new-link-container">
+        <button @click="showMyFavourites" v-if="logged">
+          Favourites
+        </button>
         <button @click="toggleModal" v-if="logged">New Link</button>
         <button @click="showPage='login'" v-else>Login</button>
       </div>
@@ -58,7 +61,9 @@
             <span class="link-score">{{item.score}}</span>
           </div>
           <div class="accordion-content">
-            <p class="link-item"><a :href="item.link" target="_blank">{{ item.link }}</a></p>
+            <p class="link-item">
+              <a :href="item.link" target="_blank">{{ item.link }}</a>
+            </p>
             <p>{{ item.desc }}</p>
             <div class="comment-container" v-if="logged">
               Score:
@@ -71,10 +76,38 @@
                 <option value="4">4</option>
                 <option value="5">5</option>
               </select>
-              <div style="display: flex;">
-                <span style="margin-left: auto;"><button @click.stop="hiddenLink(item.id)">Hidden</button></span>
+              <div style="display: flex">
+                <span style="margin-left: auto"><button @click.stop="hiddenLink(item.id)">
+                    Hidden
+                  </button></span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-container" v-if="showPage === 'Favourites'">
+      <div style="text-align: center">
+        <h2>Welcome Squirrel Pals App</h2>
+        <h4>My Favourites</h4>
+      </div>
+      <div class="new-link-container">
+        <button @click="showMain" v-if="logged">Index</button>
+      </div>
+      <div class="links-container">
+        <div class="accordion" :id="'link-' + item.id" v-for="item in links" :key="item.id"
+          @click="linkItemClick(item)">
+          <div class="accordion-header">
+            <span class="link-title">{{item.title}}</span>
+            <span class="link-owner">{{ item.username }}</span>
+            <span class="link-score">{{item.score}}</span>
+          </div>
+          <div class="accordion-content">
+            <p class="link-item">
+              <a :href="item.link" target="_blank">{{ item.link }}</a>
+            </p>
+            <p>{{ item.desc }}</p>
           </div>
         </div>
       </div>
@@ -115,8 +148,29 @@
         this.getAllLinks();
       },
       methods: {
+        async showMyFavourites() {
+          this.showPage = "Favourites";
+          const response = await fetch(
+            `http://127.0.0.1:8080/link/favourites`,
+            {
+              mode: "cors",
+              credentials: "include",
+              method: "GET",
+            }
+          );
+          if (response.status > 210) {
+            alert("Get favourites failed");
+            return;
+          }
+          const respJson = await response.json();
+          this.links = respJson.data;
+        },
+        async showMain() {
+          this.showPage = "main";
+          await this.getAllLinks();
+        },
         async hiddenLink(linkID) {
-          console.log('hidden link: ', linkID)
+          console.log("hidden link: ", linkID);
           const response = await fetch(
             `http://127.0.0.1:8080/link/hidden/${linkID}`,
             {
@@ -163,13 +217,13 @@
         async linkItemClick(linkInfo) {
           const linkItem = document.getElementById(`link-${linkInfo.id}`);
           linkItem.classList.toggle("active");
-          console.log('linkItem.classList: ', linkItem.classList)
+          console.log("linkItem.classList: ", linkItem.classList);
           if (linkItem.classList.contains("active") && this.logged) {
             // 需要去获取当前用户给这个的评分
-            await this.personalLinkScore(linkInfo)
+            await this.personalLinkScore(linkInfo);
           }
         },
-        async personalLinkScore(linkInfo){
+        async personalLinkScore(linkInfo) {
           const response = await fetch(
             `http://127.0.0.1:8080/link/score/${linkInfo.id}`,
             {
@@ -183,7 +237,7 @@
             return;
           }
           const respJson = await response.json();
-          linkInfo.personalScore = respJson.data ? respJson.data.score : null
+          linkInfo.personalScore = respJson.data ? respJson.data.score : null;
         },
         async submitNewLink() {
           const title = document.getElementById("title").value;
@@ -234,12 +288,11 @@
           console.log("links: ", respJson);
           this.links = respJson.data;
 
-          const linkContainers = document.querySelectorAll('.accordion')
-          for (let i=0; i<linkContainers.length; i++) {
-            const linkItem = linkContainers[i]
-            linkItem.classList.remove('active')
+          const linkContainers = document.querySelectorAll(".accordion");
+          for (let i = 0; i < linkContainers.length; i++) {
+            const linkItem = linkContainers[i];
+            linkItem.classList.remove("active");
           }
-
         },
         async clickHandle() {
           const fetchUri =
