@@ -1,8 +1,12 @@
-1. 运行后端
+1. 创建数据库
+
+使用 db.sql 文件创建数据库 以及数据表
+
+2. 运行后端
 
 deno run --allow-net --allow-read server.js
 
-2. 运行前端
+3. 运行前端
 
   先启动 file_server
 
