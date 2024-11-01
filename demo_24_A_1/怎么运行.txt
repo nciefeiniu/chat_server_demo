@@ -1,0 +1,33 @@
+1. 运行后端
+
+deno run --allow-net --allow-read server.js
+
+2. 运行前端
+
+  先启动 file_server
+
+  然后浏览器输入：http://127.0.0.1:4507/
+
+  注意不要输入 http://localhost:4507/  这会导致登录不上，因为这个 localhost 不能设置cookie
+
+
+
+API接口列表：
+
+/api/login  POST  登录接口
+/api/register  POST  注册接口
+/link/hidden/{linkID} GET  用户隐藏某个link
+/links GET POST  获取所有link 或者 创建新的link
+/link/score/{linekID} GET POST 获取link的评分/ 提交评分
+/link/favourites GET 获取用户的收藏列表
+
+
+
+评分规则：
+
+规则：
+      如果评分是1，那就是扣分的，扣2分
+      评分是2，扣1分
+      评分是3，不扣不加
+      评分是4，加1分
+      评分是5，加2分
