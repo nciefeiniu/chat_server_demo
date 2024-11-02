@@ -50,6 +50,8 @@ function loginHandle(username, password) {
       console.log(data);
       // Login success
       alert("Login Success!");
+      sessionStorage.setItem("logged", true);
+      window.location.href = "./index.html";
     }).catch(err => {
       console.log(err)
     });

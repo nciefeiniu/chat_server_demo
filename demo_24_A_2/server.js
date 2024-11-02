@@ -14,11 +14,13 @@ const dbClient = new Client({
 });
 
 const app = new Application();
-app.use(oakCors({
-  origin: 'http://127.0.0.1:4507',
-  credentials: true,
-  optionsSuccessStatus: 200,
-})); // 开启跨域，这里的参考来自：https://deno.land/x/cors@v1.2.2#configuring-cors
+app.use(
+  oakCors({
+    origin: "http://127.0.0.1:4507",
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+); // 开启跨域，这里的参考来自：https://deno.land/x/cors@v1.2.2#configuring-cors
 app.use(Session.initMiddleware()); // Hook it up as middleware
 const router = new Router();
 const port = 8000;
@@ -47,7 +49,10 @@ router.post("/api/users/", async (ctx) => {
   await dbClient.queryObject`INSERT INTO users (username, fullname, password)
     VALUES (${username}, ${fullname}, ${hash})`;
   ctx.response.status = 201;
-  ctx.response.body = { message: "User created!", data: {username, fullname} };
+  ctx.response.body = {
+    message: "User created!",
+    data: { username, fullname },
+  };
 });
 
 router.post("/api/login/", async (ctx) => {
@@ -70,9 +75,120 @@ router.post("/api/login/", async (ctx) => {
     return;
   }
   await ctx.state.session.set("userID", result.rows[0].id);
+  await ctx.state.session.set("fullname", result.rows[0].fullname);
+
   ctx.response.status = 200;
   ctx.response.body = { message: "Login successful!", data: result.rows[0] };
 });
+
+router.post("/api/links", async (ctx) => {
+  // 创建一个link
+  /**
+   * 注意，这里link的总分，默认是10分，也就是创建一个link，他的total_score就是10分
+   * 如果用户给这个link打分，1分就是扣2分，2分那就是扣1分，3分就是不扣不加，4分就是加1分，5分就是加2分，如果总分低于0，那就不再扣减
+   */
+  ctx.response.headers.set("Content-Type", "application/json");
+  const userID = await ctx.state.session.get("userID");
+  const fullname = await ctx.state.session.get("fullname");
+  if (!userID) {
+    // 没登录，如果没登录，那么查询的数据是没有 用户评分的，但是有总分
+    ctx.response.status = 401;
+    ctx.response.body = { message: "Please login first!" };
+    return;
+  }
+  const jsonData = await ctx.request.body.json();
+  const { title, link, describe } = jsonData;
+  await dbClient.queryObject`INSERT INTO links (title, link, describe, total_score, user_id, pub_time, user_fullname)
+    VALUES (${title}, ${link}, ${describe}, 10, ${userID}, NOW(), ${fullname})`;
+  ctx.response.status = 201;
+  ctx.response.body = { message: "Link created!", data: jsonData };
+});
+
+router.get("/api/links", async (ctx) => {
+  // 获取所有的link
+
+  ctx.response.headers.set("Content-Type", "application/json");
+  const userID = await ctx.state.session.get("userID");
+  let result = [];
+  if (!userID) {
+    // 没登录，如果没登录，那么查询的数据是没有 用户评分的，但是有总分
+    console.log('user not login')
+    result = await dbClient.queryObject`SELECT
+    id, title, link, describe, pub_time, user_fullname, total_score
+    FROM links`;
+  } else {
+    console.log('user  logged, userID: ', userID)
+    result = await dbClient.queryObject`SELECT id,
+          title,
+          link,
+          describe,
+          pub_time,
+          user_fullname,
+          total_score,
+          score
+        FROM links a
+         left join (select score, link_id from link_score where user_id = ${userID}) b on a.id = b.link_id
+         where id not in (select link_id from hidden_link where user_id=${userID})
+         ;`;
+  }
+  ctx.response.body = { message: "Links fetched successfully!", data: result.rows };
+  ctx.response.status = 200;
+});
+
+
+router.post("/api/links/:id/score", async (ctx) => {
+  //* 如果用户给这个link打分，1分就是扣2分，2分那就是扣1分，3分就是不扣不加，4分就是加1分，5分就是加2分，如果总分低于0，那就不再扣减
+  ctx.response.headers.set("Content-Type", "application/json");
+  const userID = await ctx.state.session.get("userID");
+  const jsonData = await ctx.request.body.json();
+  const { score } = jsonData;
+  if (!userID) {
+    ctx.response.status = 401;
+    ctx.response.body = { message: "Please login first!" };
+    return;
+  }
+  const exists = await dbClient.queryObject`SELECT
+    id
+    FROM link_score WHERE user_id=${userID} and link_id=${ctx.params.id}`;
+  if (exists.rows.length > 0) {
+    // 只能评价一次
+    ctx.response.status = 403;
+    ctx.response.body = { message: "You have already rated it, you cannot rate it again!" };
+    return
+  } else {
+    await dbClient.queryObject`INSERT INTO link_score (score, user_id, link_id)
+      VALUES (${score}, ${userID}, ${ctx.params.id})`;
+  }
+  if (score == 1) {
+    await dbClient.queryObject`UPDATE links SET total_score=total_score-2 WHERE id=${ctx.params.id}`;
+  } else if (score == 2) {
+    await dbClient.queryObject`UPDATE links SET total_score=total_score-1 WHERE id=${ctx.params.id}`;
+  } else if (score == 4) {
+    await dbClient.queryObject`UPDATE links SET total_score=total_score+1 WHERE id=${ctx.params.id}`;
+  } else if (score == 5) {
+    await dbClient.queryObject`UPDATE links SET total_score=total_score+2 WHERE id=${ctx.params.id}`;
+  }
+
+  ctx.response.status = 200;
+  ctx.response.body = { message: "Score updated successfully!" };
+})
+
+
+router.get("/api/links/hidden/:id", async (ctx) => {
+  // 把数据插入到hidden_link表中
+  ctx.response.headers.set("Content-Type", "application/json");
+  const userID = await ctx.state.session.get("userID");
+  const linkID = ctx.params.id
+  if (!userID) {
+    ctx.response.status = 401;
+    ctx.response.body = { message: "Please login first!" };
+    return;
+  }
+  await dbClient.queryObject`INSERT INTO hidden_link (user_id, link_id)
+    VALUES (${userID}, ${linkID})`;
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Link hidden successfully!" };
+})
 
 await dbClient.connect(); // 连接数据库
 await sodium.ready;

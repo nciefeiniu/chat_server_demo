@@ -1,0 +1,45 @@
+body {
+  background-color: #f8f9fa;
+  padding-top: 50px;
+}
+.card {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+.card-header {
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+}
+.card-body {
+  padding: 20px;
+}
+.card-title {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+.card-text {
+  color: #6c757d;
+}
+.link-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 15px;
+}
+.link-button:hover {
+  background-color: #0056b3;
+}
+
+h1 {
+  text-align: center;
+}
+
+.owner {
+  
+}
