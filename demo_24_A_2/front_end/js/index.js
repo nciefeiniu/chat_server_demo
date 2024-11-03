@@ -10,7 +10,7 @@ function links() {
     .then((res) => res.json())
     .then((respJson) => {
       const data = respJson.data;
-      const cardContainer = document.querySelector(".row");
+      const cardContainer = document.querySelector("#link-container");
       cardContainer.innerHTML = "";
       for (let i = 0; i < data.length; i++) {
         const link = data[i];
@@ -101,8 +101,7 @@ function ratingChange(event) {
     body: JSON.stringify({
       score: selectedValue,
     }),
-  })
-    .then((res) => {
+  }).then((res) => {
       if (res.ok) {
         return res.json();
       } else if (res.status === 403) {
@@ -171,10 +170,6 @@ function shareLink() {
   }).catch(err => console.log(err))
 }
 
-function name(params) {
-  // TODO 这需要写获取我的喜好的接
-}
-
 logged = sessionStorage.getItem("logged"); // 是否登录了的标志
 
 links();
@@ -183,4 +178,72 @@ if (logged) {
   document.querySelector(".login-btn").style.display = "none";
 } else {
   document.querySelector(".favourites-btn").style.display = "none";
+  document.querySelector('.share-btn').style.display = "none";
 }
+
+
+var modal = document.getElementById('exampleModal2');
+
+modal.addEventListener('show.bs.modal', function () {
+  console.log('Modal opened');
+  // 在模态框打开时执行操作
+  const favouritesContainer = document.getElementById('my-favourites');
+  favouritesContainer.innerHTML = '';
+  fetch('http://127.0.0.1:8000/api/favourites/', {
+    credentials: "include",
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw new Error('Fetch failed');
+    }
+  }).then(respJson => {
+    console.log(respJson)
+    const data = respJson.data;
+    if (!data) {
+      return
+    }
+    for (let i = 0; i < data.length; i++) {
+      const link = data[i];
+      const card = `
+          <div class="col">
+              <div class="card h-100">
+                  <div class="card-header">
+                      <h3>Share link</h3>
+                  </div>
+                  <div class="card-body">
+                      <h5 class="card-title">${link.title} ${
+        link.total_score < 10
+          ? `<span class="badge rounded-pill text-bg-danger">${link.total_score}</span>`
+          : `<span class="badge rounded-pill text-bg-success">${link.total_score}</span>`
+      }</h5>
+                      
+                      <p class="card-text"><strong>Description:</strong> ${
+                        link.describe
+                      }</p>
+                      <p class="card-text"><strong>Link:</strong> <a href="${
+                        link.link
+                      }" target="_blank">${link.link}</a></p>
+                      <p class="card-text"><strong>Published Time:</strong> ${
+                        link.pub_time
+                      }</p>
+                      <p class="card-text"><strong>Published By:</strong> ${
+                        link.user_fullname
+                      }</p>
+                      
+                  </div>
+                  <div class="card-footer">
+                      <a href="${
+                        link.link
+                      }" class="link-button" target="_blank">Access Links</a>
+                  </div>
+              </div>
+          </div>
+      `;
+      favouritesContainer.insertAdjacentHTML("beforeend", card);
+    }
+
+  }).catch(err => {
+    console.log(err)
+  })
+});

@@ -16,12 +16,14 @@
     <h1>Monkey Site</h1>
     <div style="text-align: right; margin: 20px 0;">
       <a href="./login.html" class="btn btn-primary login-btn">Login</a>
-      <a href="./login.html" class="btn btn-primary favourites-btn">Favourites</a>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      <button type="button" class="btn btn-primary favourites-btn" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+        Favourites
+      </button>
+      <button type="button" class="btn btn-primary share-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
         Share Link
       </button>
     </div>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="link-container">
     </div>
   </div>
 
@@ -58,14 +60,15 @@
 
   <!-- Modal2 -->
   <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-fullscreen">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel2">My Favourites</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="my-favourites">
-          
+        <div class="modal-body">
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="my-favourites">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

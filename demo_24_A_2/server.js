@@ -86,6 +86,7 @@ router.post("/api/links", async (ctx) => {
   /**
    * 注意，这里link的总分，默认是10分，也就是创建一个link，他的total_score就是10分
    * 如果用户给这个link打分，1分就是扣2分，2分那就是扣1分，3分就是不扣不加，4分就是加1分，5分就是加2分，如果总分低于0，那就不再扣减
+   * 数据排序是按照 pub_time 倒序
    */
   ctx.response.headers.set("Content-Type", "application/json");
   const userID = await ctx.state.session.get("userID");
@@ -115,7 +116,7 @@ router.get("/api/links", async (ctx) => {
     console.log('user not login')
     result = await dbClient.queryObject`SELECT
     id, title, link, describe, pub_time, user_fullname, total_score
-    FROM links`;
+    FROM links ORDER BY pub_time DESC`;
   } else {
     console.log('user  logged, userID: ', userID)
     result = await dbClient.queryObject`SELECT id,
@@ -128,7 +129,7 @@ router.get("/api/links", async (ctx) => {
           score
         FROM links a
          left join (select score, link_id from link_score where user_id = ${userID}) b on a.id = b.link_id
-         where id not in (select link_id from hidden_link where user_id=${userID})
+         where id not in (select link_id from hidden_link where user_id=${userID}) ORDER BY a.pub_time DESC
          ;`;
   }
   ctx.response.body = { message: "Links fetched successfully!", data: result.rows };
@@ -188,6 +189,24 @@ router.get("/api/links/hidden/:id", async (ctx) => {
     VALUES (${userID}, ${linkID})`;
     ctx.response.status = 200;
     ctx.response.body = { message: "Link hidden successfully!" };
+})
+
+
+router.get('/api/favourites', async (ctx) => {
+  // 哪种数据是用户喜欢的，打分 > 3 的都是用户喜欢的
+  ctx.response.headers.set("Content-Type", "application/json");
+  const userID = await ctx.state.session.get("userID");
+  if (!userID) {
+    ctx.response.status = 401;
+    ctx.response.body = { message: "Please login first!" };
+    return;
+  }
+  const result = await dbClient.queryObject`select l.*
+    from link_score a
+            left join links l on a.link_id = l.id
+    where l.user_id=${userID} and a.score > 3;`
+    ctx.response.body = { message: "Favourites fetched successfully!", data: result.rows };
+    ctx.response.status = 200;
 })
 
 await dbClient.connect(); // 连接数据库
