@@ -18,7 +18,7 @@ deno run --allow-net --allow-read server.js
 
 
 
-API接口列表：
+4. API接口列表：
 
 /api/login/  POST  登录接口
 /api/users/  POST  注册接口
@@ -38,3 +38,14 @@ API接口列表：
       评分是3，不扣不加
       评分是4，加1分
       评分是5，加2分
+
+
+
+5. 使用了哪些
+
+前端：
+  - JS/HTML/CSS
+  - Bootstrap，主要是UI和Modal(弹窗)，连接地址：https://getbootstrap.com/docs/5.3/components/modal/
+
+后端：(后端使用的基本都是老师提供的那些包)
+  - oakCors 这个是解决跨域问题的！
