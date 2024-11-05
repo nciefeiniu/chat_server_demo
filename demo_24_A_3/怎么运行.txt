@@ -1,0 +1,49 @@
+1. 创建数据库
+
+使用 db.sql 文件创建数据库 以及数据表
+
+修改 server.js 文件中的数据库链接地址，文件中第7行！！！
+
+2. 运行后端
+
+deno run --allow-net --allow-read server.js
+
+3. 运行前端
+
+  先启动 file_server
+
+  然后浏览器输入：http://127.0.0.1:4507/client.html 或者 http://localhost:4507/client.html 都行
+
+
+4. API接口列表：
+
+/login/  POST  登录接口
+/register  POST  注册接口
+/links GET or POST  获取所有link 或者 创建新的link
+/links/:link/hide POST  用户隐藏某个link
+/links/:link POST 提交评分，请求参数是score
+/links/favorite GET 获取用户的收藏列表
+
+
+
+评分规则：
+
+规则：
+      每新建一个link，默认的分数是0分，也就是基础分！！！
+      评分只有 good 和 bad，good就+1分，bad就-1分
+
+获取links的排序规则就是按照发布时间倒序排列
+
+
+5. 使用了哪些
+
+前端：
+  - Vue3 (https://cn.vuejs.org/guide/quick-start.html)
+  - Element UI Plus (https://element-plus.org/zh-CN/component/layout.html#%E6%B7%B7%E5%90%88%E5%B8%83%E5%B1%80)
+
+后端：(后端使用的基本都是老师提供的那些包)
+
+认证使用的是 JWT 
+
+
+6. 请注意看 client.html 中的注释，有的地方指定了从哪里引用的！！！
