@@ -133,7 +133,12 @@ router.post("/login", async (ctx) => {
 // 获取所有link接口
 router.get("/links", async (ctx) => {
   // 数据按照发布时间倒序排列
-  const sql = `SELECT * FROM links ORDER BY pub_time DESC`;
+  const loggedUserInfo = ctx.loggedUserInfo;
+  let sql = `SELECT * FROM links ORDER BY pub_time DESC`;
+  if (loggedUserInfo) {
+    // 如果登录了，需要隐藏用户不想看见的链接
+    sql = `SELECT * FROM links WHERE link NOT IN (SELECT link FROM user_hidden_links WHERE username='${loggedUserInfo.username}' ) ORDER BY pub_time DESC`
+  }
   const result = await client.queryObject(sql)
   ctx.response.body = result.rows;
   ctx.status = 200;
@@ -229,7 +234,7 @@ router.get("/links/favorite", async (ctx) => {
     ctx.response.body = { error: "Please login" };
     return;
   }
-  const result = await client.queryObject(`SELECT * FROM user_link_scores a left join links b on a.link = b.link where a.username = '${loggedUserInfo.username}' and a.good = true`);
+  const result = await client.queryObject(`SELECT b.* FROM user_link_scores a left join links b on a.link = b.link where a.username = '${loggedUserInfo.username}' and a.good = true ORDER BY b.score`);
   ctx.response.body = result.rows;
   ctx.status = 200;
 })

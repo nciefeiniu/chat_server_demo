@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running Voice</title>
+  <link href="https://cdn.jsdelivr.net/npm/element-plus@2.8.7/dist/index.min.css" rel="stylesheet" />
+  <link href="./client.css" rel="stylesheet">
+  </link>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <!-- 参考自：https://element-plus.org/zh-CN/component/tabs.html#%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95 -->
+      <el-tabs v-model="activeTab" v-if="showPage === 'login'">
+        <el-tab-pane label="login" name="login">
+          <!-- 参考自：https://element-plus.org/zh-CN/component/form.html#%E5%85%B8%E5%9E%8B%E8%A1%A8%E5%8D%95 -->
+          <el-form :model="loginForm" ref="loginFormRef" label-width="auto">
+            <el-form-item label="username" prop="username">
+              <el-input v-model="loginForm.username"></el-input>
+            </el-form-item>
+            <el-form-item label="password" prop="password">
+              <el-input type="password" v-model="loginForm.password"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleLogin">Login</el-button></el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="Register" name="register">
+          <el-form :model="registerForm" ref="registerFormRef" label-width="auto">
+            <el-form-item label="fullname" prop="fullname">
+              <el-input v-model="registerForm.fullname"></el-input>
+            </el-form-item>
+            <el-form-item label="username" prop="username">
+              <el-input v-model="registerForm.username"></el-input>
+            </el-form-item>
+            <el-form-item label="password" prop="password">
+              <el-input type="password" v-model="registerForm.password"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleRegister">Register</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
+
+      <div v-if="showPage=== 'index' || showPage === 'favourites'">
+        <div style="text-align: center;">
+          <h2>Running Voice</h2>
+        </div>
+        <div style="text-align: right; margin: 20px 0;">
+          <el-button type="primary" size="small" v-if="!isLoggedIn" @click="showPage = 'login'">Login</el-button>
+          <el-button type="primary" size="small" v-if="isLoggedIn && showPage === 'index'" @click="dialogFormVisible=true">Share Link</el-button>
+          <el-button type="primary" size="small" v-if="isLoggedIn && showPage === 'index'" @click="showFavouritesLink">Favourites</el-button>
+          <el-button type="primary" size="small" v-if="isLoggedIn && showPage === 'favourites'" @click="getAllLinks">Back</el-button>
+        </div>
+        <el-collapse v-model="activeName" accordion>
+          <el-collapse-item :name="item.link" v-for="item in shares">
+            <template #title> <!-- 标题 -->
+              {{item.title}}<span style="margin-left: 10px;">
+                <el-tag type="success" size="small" v-if="item.score > 0">{{item.score}}</el-tag>
+                <el-tag type="info" size="small" v-else-if="item.score == 0">{{item.score}}</el-tag>
+                <el-tag type="danger" size="small" v-else>{{item.score}}</el-tag>
+              </span>
+            </template>
+            <!-- 隐藏link按钮 -->
+            <div style="text-align: right; cursor: pointer;" v-if="isLoggedIn && showPage === 'index'">
+              <img width="32"  src="./hidden.png" @click="hiddenLink(item.link)"/>
+            </div>
+            <!-- 数据展示 -->
+            <div>
+              <!-- 这个参考自：https://element-plus.org/zh-CN/component/descriptions.html#%E5%9E%82%E7%9B%B4%E5%88%97%E8%A1%A8 -->
+              <el-descriptions direction="vertical" :column="3" border>
+                <el-descriptions-item label="fullname">{{item.fullname}}</el-descriptions-item>
+                <el-descriptions-item label="pub_time">{{item.pub_time}}</el-descriptions-item>
+                <el-descriptions-item label="Link">{{item.link}}</el-descriptions-item>
+                <el-descriptions-item label="description">{{item.description}}</el-descriptions-item>
+              </el-descriptions>
+            </div>
+            <!-- 评分按钮 -->
+            <div style="margin-top: 20px;" v-if="isLoggedIn && showPage === 'index'">
+              <!-- 参考自：https://element-plus.org/zh-CN/component/layout.html#%E6%B7%B7%E5%90%88%E5%B8%83%E5%B1%80 -->
+              <el-row :gutter="20">
+                <el-col :span="12" style="text-align: center;"><el-button @click="linkScore(1, item.link)">👍</el-button></el-col>
+                <el-col :span="12" style="text-align: center;"><el-button @click="linkScore(0, item.link)">👇</el-button></el-col>
+              </el-row>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+      <!-- New share link dialog -->
+       <!-- 参考自：https://element-plus.org/zh-CN/component/dialog.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%86%85%E5%AE%B9 -->
+      <el-dialog v-model="dialogFormVisible" title="Share Link" width="500">
+        <el-form :model="shareLinkForm" label-width="auto">
+          <el-form-item label="Title" >
+            <el-input v-model="shareLinkForm.title" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="Description" >
+            <el-input v-model="shareLinkForm.description" :rows="2" type="textarea" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="Link" >
+            <el-input v-model="shareLinkForm.link" autocomplete="off" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">Cancel</el-button>
+            <el-button type="primary" @click="shareLink">
+              Confirm
+            </el-button>
+          </div>
+        </template>
+      </el-dialog>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.12/dist/vue.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2.8.7/dist/index.full.min.js"></script>
+  <script>
+    const { createApp } = Vue;
+    var USERTOKEN = null
+
+    createApp({
+      data() {
+        return {
+          apiDomain: 'http://127.0.0.1:8000',
+          activeTab: 'login',
+          isLoggedIn: false,
+          fullname: '',
+          showPage: 'index',
+          loginForm: {
+            username: '',
+            password: ''
+          },
+          registerForm: {
+            fullname: '',
+            username: '',
+            password: ''
+          },
+          shares: [],
+          activeName: null,
+          dialogFormVisible: false,
+          shareLinkForm: {
+            link: '',
+            title: '',
+            description: '',
+          }
+        };
+      },
+      mounted() {
+        this.getAllLinks()
+      },
+      methods: {
+        async showFavouritesLink() {
+          // 显示用户收藏的链接
+          this.showPage = 'favourites'
+          const result = await fetch(this.apiDomain + '/links/favorite', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + USERTOKEN
+            }
+          });
+          const respJson = await result.json()
+          if (result.status !== 200) {
+            this.$message.error(respJson.error || 'Something went wrong')
+            return
+          }
+          this.shares = respJson
+        },
+        async hiddenLink(link){
+          // 用户隐藏某个链接
+          const result = await fetch(this.apiDomain + '/links/' + encodeURIComponent(link) + '/hide', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + USERTOKEN
+            }
+          });
+          const respJson = await result.json()
+          if (result.status !== 201) {
+            this.$message.error(respJson.error || 'Something went wrong')
+            return
+          }
+          this.$message({
+            message: 'Hidden Success',
+            type: 'success',
+          })
+          this.getAllLinks()
+        },
+        async linkScore(scoreType, link){
+          // 评分，每个用户对每个链接只能评分一次
+          const result = await fetch(this.apiDomain + '/links/' + encodeURIComponent(link), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + USERTOKEN
+            },
+            body: JSON.stringify({
+              score: scoreType
+            })
+          })
+          const respJson = await result.json()
+          if (result.status !== 201) {
+            this.$message.error(respJson.error || 'Something went wrong!')
+            return
+          }
+          this.$message({
+            message: 'Score Success',
+            type: 'success',
+          })
+          this.getAllLinks()
+        },
+        async shareLink(){
+          const result = await fetch(this.apiDomain + '/links', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + USERTOKEN
+            },
+            body: JSON.stringify(this.shareLinkForm)
+          })
+          const respJson = await result.json()
+          if (result.status == 201) {
+            this.$message({
+              message: 'Share Link Success',
+              type: 'success',
+            })
+            this.dialogFormVisible = false
+            this.getAllLinks()
+          } else {
+            this.$message.error(respJson.error || 'Something went wrong!')
+          }
+        },
+        async getAllLinks(){
+          const headers = {
+            'Content-Type': 'application/json',
+          }
+          if (this.isLoggedIn) {
+            headers['Authorization'] = 'Bearer ' + USERTOKEN
+          }
+          const result = await fetch(this.apiDomain + '/links', {
+            method: 'GET',
+            headers: headers
+          })
+          const respJson = await result.json();
+          if (result.status == 200) {
+            this.showPage = 'index'
+            this.shares = respJson
+          } else {
+            this.$message.error(respJson.error || 'Something went wrong!')
+          }
+        },
+        async handleLogin() {
+          console.log('Login Form:', this.loginForm);
+          // 这里可以添加登录逻辑
+          const result = await fetch(this.apiDomain + '/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.loginForm)
+          })
+          const respJson = await result.json();
+          console.log(respJson)
+          if (result.status == 200) {
+            this.$message({
+              message: 'Login Successful!',
+              type: 'success',
+            })
+            this.isLoggedIn = true;
+            this.fullname = respJson.fullname
+            this.showPage = 'index'
+            USERTOKEN = respJson.token
+            this.getAllLinks()
+          } else {
+            this.$message.error(respJson.error)
+          }
+        },
+        async handleRegister() {
+          const result = await fetch(this.apiDomain + '/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.registerForm)
+          })
+          const respJson = await result.json();
+          if (result.status === 201) {
+            this.$message({
+              message: 'Register Successful! Please login.',
+              type: 'success',
+            })
+            this.activeTab = 'register'
+          } else {
+            this.$message.error(respJson.error)
+          }
+
+        },
+        showDetails(index) {
+          this.selectedShare = this.shares[index];
+        }
+      }
+    }).use(ElementPlus).mount('#app');
+  </script>
+</body>
+
+</html>
