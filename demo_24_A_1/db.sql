@@ -1,18 +1,17 @@
-CREATE DATABASE "ITECH3108_30407210_a2" IF NOT EXISTS;
+CREATE DATABASE "ITECH3108_30407210_a2";
 
 \connect "ITECH3108_30407210_a2"
 
-create table public.users
+create table users
 (
-    id       integer default nextval('user_id_seq'::regclass) not null
-        constraint user_pk
+    id       serial
+        constraint users_pk
             primary key,
-    username varchar(32)                                      not null,
-    password varchar(255)                                     not null
+    username varchar(32),
+    password varchar(255)
 );
 
-
-create table public.links
+create table links
 (
     id      serial
         constraint links_pk
@@ -26,7 +25,7 @@ create table public.links
             references users
 );
 
-create table public.score_detail
+create table score_detail
 (
     id      serial
         constraint score_detail_pk
@@ -40,8 +39,7 @@ create table public.score_detail
     score   integer
 );
 
-
-create table public.good_link
+create table good_link
 (
     id      serial
         constraint good_link_pk
@@ -54,8 +52,7 @@ create table public.good_link
             references links
 );
 
-
-create table public.bad_link
+create table bad_link
 (
     id      serial
         constraint bad_link_pk

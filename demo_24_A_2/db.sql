@@ -1,6 +1,6 @@
-create database ITECH3108_30407223_a2;
+create database "ITECH3108_30407223_a2";
 
-\c ITECH3108_30407223_a2;
+\c "ITECH3108_30407223_a2";
 
 create table users
 (
