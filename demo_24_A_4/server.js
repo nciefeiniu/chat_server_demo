@@ -36,6 +36,7 @@ async function register(ctx) {
     ctx.response.body = { message: "Username already exists" };
     return;
   } 
+  // 密码加密，参考自课件 week_09/passwords/auth_simple.js 
   const hashPassword = sodium.crypto_pwhash_str(password,
       sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
       sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE);
@@ -61,6 +62,7 @@ async function login(ctx) {
     return;
   } 
   const dbUser = result.rows[0];
+  // 密码验证，参考自课件 week_09/passwords/auth_simple.js 
   const passwordIsOk = sodium.crypto_pwhash_str_verify(dbUser.password, password);
   if (!passwordIsOk) {
     ctx.response.status = 401;
@@ -111,7 +113,7 @@ async function addShareLink(ctx) {
   const reqJson = await ctx.request.body.json();  // 获取请求发送的JSON数据
   const { link, title, description } = reqJson;
   const result = await pgClient.queryObject(`INSERT INTO share_links (link, title, description) VALUES ('${link}','${title}', '${description}')`);
-  ctx.response.body = result.rows[0];
+  ctx.response.body = { link, title, description};
   ctx.response.status = 201;
 }
 
@@ -130,7 +132,7 @@ async function addHiddenLink(ctx) {
   const reqJson = await ctx.request.body.json();
   const { id } = reqJson;
   const result = await pgClient.queryObject(`INSERT INTO hidden_links (username, share_link_id) VALUES ('${ctx.username}', '${id}')`);
-  ctx.response.body = result.rows[0];
+  ctx.response.body = {id, hidden: true};
   ctx.response.status = 201;
 }
 
@@ -158,14 +160,14 @@ async function shareLinkScore(ctx) {
   }
   const result = await pgClient.queryObject(`INSERT INTO scores (username, share_link_id, score) VALUES ('${ctx.username}', '${id}', '${score}')`);
   const updatedTotalScore = await pgClient.queryObject(`UPDATE share_links SET total_score = total_score + ${score} WHERE id = '${id}'`);
-  ctx.response.body = result.rows[0];
+  ctx.response.body = {id, score};
   ctx.response.status = 201;
 }
 
 
 async function positiveShareLinks(ctx) {
   /**
-   * 获取所有评分大于 0 的分享链接
+   * 获取用户所有评分大于 0 的分享链接
    * 这里也需要用户登录了才能访问
    */
   if (!ctx.username) {
@@ -190,15 +192,20 @@ router.get("/share_links/positive", positiveShareLinks);  // 获取评分大于0
 
 app.use(async (ctx, next) => {
   // 跨域支持，参考自：https://github.com/oakserver/oak/issues/154#issuecomment-640657239
-  ctx.response.headers.set('Access-Control-Allow-Origin', '*')
+  ctx.response.headers.set('Access-Control-Allow-Origin', "*")
   ctx.response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   ctx.response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   ctx.response.headers.set('content-type', 'application/json')  // 这里设置下，返回的数据类型都是JSON
+  
+  if (ctx.request.method === "OPTIONS") {
+    ctx.response.status = 204;
+    return
+  }
 
   // 检测是否登录了
-  if (context.request.headers.has("Authorization")) {
+  if (ctx.request.headers.has("Authorization") && ctx.request.headers.get("Authorization")) {
     // 如果登录了，需要在这里处理下。
-    const authHeader = context.request.headers.get("Authorization");
+    const authHeader = ctx.request.headers.get("Authorization");
     const [type, token] = authHeader.split(" ");
 
     try {
