@@ -147,6 +147,7 @@ async function createNewLink(req) {
   // 创建新的链接
   const { title, desc, link } = await req.json(req);
   const currentUserID = req.currentUserID;
+  console.log(currentUserID)
   await client.queryArray(
     `INSERT INTO links (link, title, "desc", user_id) VALUES ('${link}', '${title}', '${desc}', ${currentUserID});`
   );
