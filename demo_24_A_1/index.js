@@ -1,5 +1,6 @@
 const { createApp, ref } = Vue;
 
+// 这里就是 Vue的写法，可见 https://cn.vuejs.org/guide/introduction#what-is-vue
 createApp({
   data() {
     return {
@@ -11,14 +12,18 @@ createApp({
     };
   },
   mounted() {
+    // Vue 生命周期函数，在页面加载后执行，也就是页面加载完成，我们去获取所有的links
     this.getAllLinks();
   },
   methods: {
+    // 这里都是 methods，也就是 Vue 的方法，这里就是我们自己写的方法，比如登录，注册，获取所有的links，等等
     logout(){
+      // 退出登录，刷新页面
       location.reload();
     },
     async showMyFavourites() {
-      this.showPage = "Favourites";
+      // 显示我的收藏，通过ApI 调用接口
+      this.showPage = "Favourites";   // 设置显示的页面为我的收藏，然后获取所有的收藏
       const response = await fetch(`http://127.0.0.1:8080/link/favourites`, {
         mode: "cors",
         credentials: "include",
@@ -32,10 +37,12 @@ createApp({
       this.links = respJson.data;
     },
     async showMain() {
+      // 显示所有链接
       this.showPage = "main";
       await this.getAllLinks();
     },
     async hiddenLink(linkID) {
+      // 隐藏链接，通过API 调用接口
       console.log("hidden link: ", linkID);
       const response = await fetch(
         `http://127.0.0.1:8080/link/hidden/${linkID}`,
@@ -53,6 +60,7 @@ createApp({
       await this.getAllLinks();
     },
     async handleChange(event, linkID) {
+      // 评分
       event.stopPropagation();
       const value = event.target.value;
       console.log("选择的分数：", value);
@@ -82,6 +90,7 @@ createApp({
       this.getAllLinks();
     },
     async linkItemClick(linkInfo) {
+      // 点击链接，显示详情
       const linkItem = document.getElementById(`link-${linkInfo.id}`);
       linkItem.classList.toggle("active");
       console.log("linkItem.classList: ", linkItem.classList);
@@ -91,6 +100,7 @@ createApp({
       }
     },
     async personalLinkScore(linkInfo) {
+      // 获取个人评分
       const response = await fetch(
         `http://127.0.0.1:8080/link/score/${linkInfo.id}`,
         {
@@ -107,6 +117,7 @@ createApp({
       linkInfo.personalScore = respJson.data ? respJson.data.score : null;
     },
     async submitNewLink() {
+      // 提交新链接
       const title = document.getElementById("title").value;
       const desc = document.getElementById("desc").value;
       const link = document.getElementById("link").value;
@@ -139,6 +150,7 @@ createApp({
       this.toggleModal();
     },
     toggleModal() {
+      // 切换模态框
       const modal = document.getElementById("modal");
       const overlay = document.querySelector(".overlay");
       modal.style.display = modal.style.display === "block" ? "none" : "block";
@@ -146,6 +158,7 @@ createApp({
         overlay.style.display === "block" ? "none" : "block";
     },
     async getAllLinks() {
+      // 获取所有的链接
       const response = await fetch("http://127.0.0.1:8080/links", {
         mode: "cors",
         credentials: "include",
@@ -161,6 +174,7 @@ createApp({
       }
     },
     async clickHandle() {
+      // 登录 or 注册，这里根据 showPage 这个参数，判断是 登录还是注册
       const fetchUri =
         this.showPage === "login"
           ? "http://127.0.0.1:8080/login"

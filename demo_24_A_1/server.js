@@ -12,7 +12,7 @@ const databaseInfo = {
   database: "ITECH3108_30407210_a2",
   hostname: "localhost",
   port: 5432,
-};
+};  // 连接数据库的配置
 
 const serverPort = 8080;
 
@@ -25,12 +25,14 @@ const client = new Client(databaseInfo);
 const decoder = new TextDecoder();
 const headers = new Headers();
 
+// 这里是设置允许跨域的响应头，这里允许所有来源的跨域请求
 headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, HEAD, PUT");
 headers.set("Access-Control-Allow-Headers", "Content-Type");
 headers.set("content-type", "application/json");
 headers.set("Access-Control-Allow-Credentials", true);
 
 function generateRandomString(length = 16) {
+  // 生成随机的字符串，用来作为 session 的key
   let result = "";
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -44,11 +46,13 @@ function generateRandomString(length = 16) {
 }
 
 async function readJson(req) {
+  // 这个方法是去请求中读取JSON格式的数据，返回一个对象
   const buf = await Deno.readAll(req.body);
   return JSON.parse(decoder.decode(buf));
 }
 
 async function OptionsResponse(req) {
+  // 这是返回状态码是 204 的response，用于处理 OPTIONS 请求
   req.respond({
     headers,
     status: 204,
@@ -57,8 +61,10 @@ async function OptionsResponse(req) {
 
 async function createUser(req) {
   // 创建用户，也就是注册用户的操作
-  const { username, password } = await req.json(req);
+  // 用户点击注册用户，就是这里进行验证
+  const { username, password } = await req.json(req);  // 从请求中读取JSON数据
   if (!username || !password) {
+    // 如果没有账号或者密码，就返回400响应
     return req.respond({
       headers,
       status: 400,
@@ -67,20 +73,23 @@ async function createUser(req) {
       }),
     });
   }
+  // 去数据库中查找，看是否已经有这个用户了！！！
   const result = await client.queryArray(
     `SELECT id,username,password FROM users WHERE username = '${username}'`
   );
   if (result.rows.length > 0) {
+    // 如果有就返回403 响应
     return req.respond({
       headers,
       status: 403,
       body: JSON.stringify({ message: "User already exists!" }),
     });
   }
+  // 密码加密存储，不是明文存储，加密使用的是 bcrypt
   const hashedPassword = await bcrypt.hash(password); // 密码使用 bcrypt 加密
   await client.queryArray(
     `INSERT INTO users (username, password) VALUES ('${username}', '${hashedPassword}');`
-  );
+  ); // 插入到数据库中
   await client.queryArray("COMMIT");
   return req.respond({
     headers,
@@ -90,6 +99,7 @@ async function createUser(req) {
 }
 
 async function login(req) {
+  // 登录请求的处理，这里是登录的过程，这里需要验证账号和密码是否正确
   const { username, password } = await req.json(req);
   console.log(`username: ${username}`);
   // 检查 username 和 password 是否存在
@@ -144,15 +154,15 @@ async function login(req) {
 }
 
 async function createNewLink(req) {
-  // 创建新的链接
+  // 创建新的链接，也就是用户分享链接的后端请求
   const { title, desc, link } = await req.json(req);
-  const currentUserID = req.currentUserID;
+  const currentUserID = req.currentUserID;  // 这里是看用户是否登录了，登录了的话，这里再req中就会有这个 currentUserID 这个参数
   console.log(currentUserID)
   await client.queryArray(
     `INSERT INTO links (link, title, "desc", user_id) VALUES ('${link}', '${title}', '${desc}', ${currentUserID});`
-  );
+  );  // 把数据插入到数据库中
   await client.queryArray("COMMIT");
-  return req.respond({
+  return req.respond({  // 返回201状态码，表示创建成功
     headers,
     status: 201,
     body: JSON.stringify({
@@ -163,16 +173,21 @@ async function createNewLink(req) {
 }
 
 async function getLinks(req) {
-  // 获取所有链接
+  // 获取所有链接，也就是获取所有的用户分享的链接
+  // 但是这里登录 or 未登录，返回的数据不是一致的
+  // 因为登录了，需要把用户隐藏掉的链接去掉，不能显示给用户看
+  // 这里比较简单，就是直接去数据库中查询数据即可
   const currentUserID = req.currentUserID;
   let result = [];
   if (currentUserID) {
+    // 登录状态
     result = await client.queryObject(
       `SELECT a.id,link,title,"desc",score, u.username FROM links a join users u on u.id = a.user_id
       where a.id not in (select link_id from bad_link c where c.user_id=${currentUserID})
       order by score desc;`
     );
   } else {
+    // 未登录状态
     result = await client.queryObject(
       `SELECT a.id,link,title,"desc",score, u.username FROM links a join users u on u.id = a.user_id order by score desc;`
     );
@@ -209,14 +224,15 @@ async function updateLinkScore(req, linkID) {
 
   const result = await client.queryArray(`
     SELECT * FROM score_detail WHERE user_id = ${currentUserID} AND link_id = ${linkID}
-    `);
+    `);   // 这里是查询用户是否已经评价过这个link了
 
   if (result.rows.length > 0) {
-    // 如果评价过了，那就只能更新数据，不能新建！！！
+    // 如果评价过了，那就只能更新数据，不能新建！！！ 是用UPDATE 语句，更新数据！！！
     await client.queryArray(`
         UPDATE score_detail SET score = ${score} WHERE user_id = ${currentUserID} AND link_id = ${linkID}
         `);
   } else {
+    // 没有评价过，那就直接插入到 score_detail 表中
     await client.queryArray(`
         INSERT INTO score_detail (user_id, link_id, score) VALUES (${currentUserID}, ${linkID}, ${score})
         `);
@@ -226,6 +242,7 @@ async function updateLinkScore(req, linkID) {
     SELECT score FROM score_detail WHERE link_id = ${linkID}
     `);
   let totalScore = 0;
+  // 把这个link的所有用户的评分汇总，按规则汇总，然后
   for (let i = 0; i < commentData.rows.length; i++) {
     const currentScore = commentData.rows[i].score;
     if (currentScore === 1) {
@@ -240,11 +257,12 @@ async function updateLinkScore(req, linkID) {
       totalScore += 2;
     }
   }
-
+  // 然后 更新 links 表中的 score 字段
   await client.queryArray(
     `UPDATE links SET score = ${totalScore} WHERE id = ${linkID};`
   );
 
+  // 这里是把用户的好评数据删除，然后重新插入
   await client.queryArray(
     `DELETE FROM good_link WHERE user_id = ${currentUserID} AND link_id = ${linkID};`
   );
@@ -266,8 +284,9 @@ async function updateLinkScore(req, linkID) {
 
 
 async function getLinkPersonalScore(req, linkID) {
-  // 获取用户信息
+  // 获取用户对该link的评分
   const currentUserID = req.currentUserID;
+  // 直接去 score_detail 表中 查询对应的数据即可
   const result = await client.queryObject(
     `SELECT score FROM score_detail WHERE user_id = ${currentUserID} AND link_id = ${linkID}`
   );
@@ -282,11 +301,15 @@ async function getLinkPersonalScore(req, linkID) {
 }
 
 async function hideLink(req, linkID) {
+  // 隐藏链接，也就是把链接加入到 bad_link 表中
+  // 这个接口需要用户登录
   const currentUserID = req.currentUserID;
+  // 先查询这个链接是否已经在这个数据表中
   const result = await client.queryArray(
     `SELECT * FROM bad_link WHERE link_id = ${linkID} and user_id = ${currentUserID};`
   );
   if (result.rows.length < 1) {
+    // 不存在才能插入到这个表中，防止数据重复
     await client.queryArray(
       `INSERT INTO bad_link (user_id, link_id) VALUES (${currentUserID}, ${linkID});`
     );
@@ -303,7 +326,11 @@ async function hideLink(req, linkID) {
 }
 
 async function getFavouriteLinks(req) {
+  // 获取用户的收藏夹
   const currentUserID = req.currentUserID;
+  // 这里直接去表中查询即可，这里是三张表关联查询，也就是 sql的join操作
+  // good_link 表是中间表，关联两个表，links 和 users
+  // 因为要显示用户名，所以要关联 users 表，还要显示 link 的描述
   const result = await client.queryObject(
     `SELECT a.id,link,title,"desc",score, u.username FROM good_link b join links a on a.id = b.link_id join users u on u.id = a.user_id where b.user_id=${currentUserID} order by score desc;`
   );
@@ -319,6 +346,7 @@ async function getFavouriteLinks(req) {
 }
 
 async function main() {
+  // 启动函数，也就是 http 服务的启动函数，这是后端的入口
   await client.connect(); // 连接数据库
   const server = serve({ port: serverPort });
 
@@ -326,6 +354,7 @@ async function main() {
     const pathname = req.url;
     const method = req.method;
     const now = new Date();
+    // 设置响应头，允许前端跨域访问
     headers.set("Access-Control-Allow-Origin", req.headers.get("origin"));
 
     console.log(`(${now.toISOString()}) Request: ${method} ${pathname}`);
@@ -335,12 +364,13 @@ async function main() {
     const currentUserSession = requestCookies.sessionID;
     console.log("currentUserSession: ", currentUserSession);
     if (sessions[currentUserSession]) {
-      // 已登录的用户
+      // 已登录的用户，就在这里设置下 currentUserID 
       req.currentUserID = sessions[currentUserSession].id;
     }
     // console.log(sessions)
     console.log("current user id: ", req.currentUserID);
 
+    // 下面是判断请求的路径，也就是 pathname
     try {
       if (method === "OPTIONS") {
         // 预检请求，直接返回 204 No Content

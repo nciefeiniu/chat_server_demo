@@ -3,6 +3,12 @@ var logged = false;
 const myModal = new bootstrap.Modal(document.getElementById('exampleModal'))
 
 
+document.querySelector('.logout-btn').addEventListener("click", function () {
+  sessionStorage.clear();
+  window.location.reload();
+});
+
+
 function links() {
   fetch("http://127.0.0.1:8000/api/links", {
     credentials: "include",
@@ -176,9 +182,11 @@ links();
 
 if (logged) {
   document.querySelector(".login-btn").style.display = "none";
+  document.querySelector(".logout-btn").style.display = "inline";
 } else {
   document.querySelector(".favourites-btn").style.display = "none";
   document.querySelector('.share-btn').style.display = "none";
+  document.querySelector(".logout-btn").style.display = "none";
 }
 
 
